@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Root HMI Interface - Industrial File Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff41;
+            overflow: hidden;
+        }
+
+        .hmi-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            border: 2px solid #00ff41;
+        }
+
+        .hmi-header {
+            background: linear-gradient(90deg, #003300, #004400);
+            padding: 10px 20px;
+            border-bottom: 1px solid #00ff41;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .hmi-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            text-shadow: 0 0 5px #00ff41;
+        }
+
+        .status-indicator {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .status-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff41;
+            box-shadow: 0 0 10px #00ff41;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .hmi-content {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 2px;
+            background: #003300;
+        }
+
+        .control-panel {
+            background: #002200;
+            border: 1px solid #00ff41;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-title {
+            font-size: 1em;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #66ff66;
+            text-transform: uppercase;
+            border-bottom: 1px solid #00ff41;
+            padding-bottom: 5px;
+        }
+
+        .metrics-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .metric {
+            background: #001100;
+            border: 1px solid #004400;
+            padding: 8px;
+            text-align: center;
+            border-radius: 3px;
+        }
+
+        .metric-label {
+            font-size: 0.7em;
+            color: #88cc88;
+            display: block;
+        }
+
+        .metric-value {
+            font-size: 1.2em;
+            color: #00ff41;
+            font-weight: bold;
+            display: block;
+            text-shadow: 0 0 3px #00ff41;
+        }
+
+        .plc-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .plc-item {
+            background: #001a00;
+            border: 1px solid #004400;
+            margin: 5px 0;
+            padding: 8px;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .plc-name {
+            font-size: 0.9em;
+            color: #66ff66;
+        }
+
+        .plc-status {
+            font-size: 0.8em;
+            padding: 2px 6px;
+            border-radius: 2px;
+            background: #004400;
+            color: #00ff41;
+        }
+
+        .alarm-panel {
+            color: #ffaa00;
+        }
+
+        .alarm-item {
+            background: #2a1a00;
+            border: 1px solid #ffaa00;
+            margin: 3px 0;
+            padding: 6px;
+            font-size: 0.8em;
+            border-radius: 2px;
+        }
+
+        .control-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .hmi-button {
+            background: #003300;
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-family: inherit;
+            font-size: 0.8em;
+            transition: all 0.2s;
+        }
+
+        .hmi-button:hover {
+            background: #004400;
+            box-shadow: 0 0 5px #00ff41;
+        }
+
+        .emergency-stop {
+            background: #440000 !important;
+            border-color: #ff4444 !important;
+            color: #ff4444 !important;
+            font-weight: bold;
+        }
+
+        .time-display {
+            font-size: 0.9em;
+            color: #88cc88;
+        }
+    </style>
+</head>
+<body>
+    <div class="hmi-container">
+        <div class="hmi-header">
+            <div class="hmi-title">ROOT ENTERPRISE HMI - FILE MANAGEMENT SYSTEM</div>
+            <div class="status-indicator">
+                <div class="status-light"></div>
+                <span>SCADA ONLINE</span>
+                <div class="status-light"></div>
+                <span>10 PLCs ACTIVE</span>
+                <div class="time-display" id="currentTime"></div>
+            </div>
+        </div>
+
+        <div class="hmi-content">
+            <!-- System Overview Panel -->
+            <div class="control-panel">
+                <div class="panel-title">System Overview</div>
+                <div class="metrics-display">
+                    <div class="metric">
+                        <span class="metric-label">Total Files</span>
+                        <span class="metric-value" id="totalFiles">---</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Total Size</span>
+                        <span class="metric-value" id="totalSize">---</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">CPU Load</span>
+                        <span class="metric-value" id="cpuLoad">---</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Memory</span>
+                        <span class="metric-value" id="memoryUsage">---</span>
+                    </div>
+                </div>
+                <div class="control-buttons">
+                    <button class="hmi-button" onclick="refreshSystem()">REFRESH SYSTEM</button>
+                    <button class="hmi-button" onclick="scanAllPLCs()">SCAN ALL PLCs</button>
+                    <button class="hmi-button" onclick="optimizeSystem()">OPTIMIZE</button>
+                    <button class="hmi-button emergency-stop" onclick="emergencyStop()">EMERGENCY STOP</button>
+                </div>
+            </div>
+
+            <!-- PLC Status Panel -->
+            <div class="control-panel">
+                <div class="panel-title">PLC Network Status</div>
+                <div class="plc-list" id="plcList">
+                    <div class="plc-item">
+                        <span class="plc-name">PLC1 - Client Area</span>
+                        <span class="plc-status">RUNNING</span>
+                    </div>
+                    <div class="plc-item">
+                        <span class="plc-name">PLC2 - Server Area</span>
+                        <span class="plc-status">RUNNING</span>
+                    </div>
+                    <div class="plc-item">
+                        <span class="plc-name">PLC3 - Shared Area</span>
+                        <span class="plc-status">RUNNING</span>
+                    </div>
+                    <div class="plc-item">
+                        <span class="plc-name">PLC4 - Components</span>
+                        <span class="plc-status">ACTIVE</span>
+                    </div>
+                    <div class="plc-item">
+                        <span class="plc-name">PLC5 - Services</span>
+                        <span class="plc-status">RUNNING</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Control Panel -->
+            <div class="control-panel">
+                <div class="panel-title">Process Control</div>
+                <div class="metrics-display">
+                    <div class="metric">
+                        <span class="metric-label">Operations/Min</span>
+                        <span class="metric-value" id="operationsRate">12</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Queue Depth</span>
+                        <span class="metric-value" id="queueDepth">3</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Throughput</span>
+                        <span class="metric-value" id="throughput">1.2MB/s</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Efficiency</span>
+                        <span class="metric-value" id="efficiency">94%</span>
+                    </div>
+                </div>
+                <div class="control-buttons">
+                    <button class="hmi-button" onclick="startAutomation()">START AUTO</button>
+                    <button class="hmi-button" onclick="pauseAutomation()">PAUSE</button>
+                    <button class="hmi-button" onclick="resetCounters()">RESET</button>
+                    <button class="hmi-button" onclick="viewLogs()">VIEW LOGS</button>
+                </div>
+            </div>
+
+            <!-- Alarm Panel -->
+            <div class="control-panel alarm-panel">
+                <div class="panel-title">Active Alarms</div>
+                <div class="plc-list">
+                    <div class="alarm-item">
+                        [WARN] File System processing load high - 87%
+                    </div>
+                    <div class="alarm-item">
+                        [INFO] PLC5 Services scan completed
+                    </div>
+                    <div class="alarm-item">
+                        [WARN] Directory sync operation queued
+                    </div>
+                </div>
+                <div class="control-buttons">
+                    <button class="hmi-button" onclick="ackAllAlarms()">ACK ALL</button>
+                    <button class="hmi-button" onclick="clearAlarms()">CLEAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simulate real-time HMI updates
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString();
+        }
+
+        function updateMetrics() {
+            // Simulate changing metrics
+            document.getElementById('totalFiles').textContent = Math.floor(Math.random() * 500 + 200);
+            document.getElementById('totalSize').textContent = (Math.random() * 50 + 10).toFixed(1) + 'MB';
+            document.getElementById('cpuLoad').textContent = (Math.random() * 30 + 60).toFixed(1) + '%';
+            document.getElementById('memoryUsage').textContent = (Math.random() * 20 + 65).toFixed(1) + '%';
+            
+            document.getElementById('operationsRate').textContent = Math.floor(Math.random() * 20 + 5);
+            document.getElementById('queueDepth').textContent = Math.floor(Math.random() * 8);
+            document.getElementById('throughput').textContent = (Math.random() * 2 + 0.5).toFixed(1) + 'MB/s';
+            document.getElementById('efficiency').textContent = (Math.random() * 10 + 90).toFixed(0) + '%';
+        }
+
+        function refreshSystem() {
+            alert('System refresh initiated. All PLCs will report current status.');
+        }
+
+        function scanAllPLCs() {
+            alert('Scanning all PLC controllers for status updates...');
+        }
+
+        function optimizeSystem() {
+            alert('System optimization started. File operations will be analyzed and optimized.');
+        }
+
+        function emergencyStop() {
+            if (confirm('EMERGENCY STOP: This will halt all file operations immediately. Continue?')) {
+                alert('EMERGENCY STOP ACTIVATED - All operations halted');
+            }
+        }
+
+        function startAutomation() {
+            alert('Automation sequence started. PLCs will operate in automatic mode.');
+        }
+
+        function pauseAutomation() {
+            alert('Automation paused. Manual control enabled.');
+        }
+
+        function resetCounters() {
+            alert('Performance counters reset to zero.');
+        }
+
+        function viewLogs() {
+            alert('Opening system operation logs...');
+        }
+
+        function ackAllAlarms() {
+            alert('All alarms acknowledged.');
+        }
+
+        function clearAlarms() {
+            alert('Alarm history cleared.');
+        }
+
+        // Initialize HMI
+        setInterval(updateTime, 1000);
+        setInterval(updateMetrics, 3000);
+        updateTime();
+        updateMetrics();
+
+        // Load PLC configuration
+        fetch('../.plc/plc-config.json')
+            .then(response => response.json())
+            .then(config => {
+                console.log('PLC Configuration loaded:', config);
+                // Update HMI with real PLC data
+            })
+            .catch(error => {
+                console.log('PLC configuration not available in static mode');
+            });
+    </script>
+</body>
+</html>

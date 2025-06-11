@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial Automation File Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #00ff41;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 2px solid #00ff41;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            text-shadow: 0 0 10px #00ff41;
+            margin-bottom: 10px;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2em;
+            color: #66ff66;
+            margin-bottom: 20px;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .status-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff41;
+            box-shadow: 0 0 10px #00ff41;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .card {
+            background: rgba(0, 255, 65, 0.1);
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            padding: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            transform: translateY(-5px);
+        }
+        
+        .card h3 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            color: #00ff41;
+            text-transform: uppercase;
+        }
+        
+        .card p {
+            color: #cccccc;
+            margin-bottom: 15px;
+        }
+        
+        .card ul {
+            list-style: none;
+            margin: 15px 0;
+        }
+        
+        .card ul li {
+            color: #99ff99;
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .card ul li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: #00ff41;
+        }
+        
+        .links {
+            text-align: center;
+            margin: 40px 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            background: rgba(0, 255, 65, 0.2);
+            border: 1px solid #00ff41;
+            color: #00ff41;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            background: rgba(0, 255, 65, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+        }
+        
+        .terminal {
+            background: #000;
+            border: 1px solid #00ff41;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .terminal-header {
+            color: #00ff41;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .terminal-content {
+            color: #66ff66;
+            white-space: pre-line;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid #00ff41;
+            margin-top: 60px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>INDUSTRIAL AUTOMATION</h1>
+            <div class="subtitle">Advanced File Management System</div>
+            <div class="subtitle">HMI-PLC-SCADA Architecture Applied to Repository Operations</div>
+            
+            <div class="status-bar">
+                <div class="status-item">
+                    <div class="status-light"></div>
+                    <span>Virtual Gateway Online</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-light"></div>
+                    <span>10 PLCs Deployed</span>
+                </div>
+                <div class="status-item">
+                    <div class="status-light"></div>
+                    <span>MQTT/WebSocket Active</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="grid">
+            <div class="card">
+                <h3>🏭 System Overview</h3>
+                <p>Revolutionary file management system that applies proven industrial automation architecture to solve repository operation challenges.</p>
+                <ul>
+                    <li>Virtual Ignition Gateway (Express Server)</li>
+                    <li>UNS (Unified Namespace) Tag Structure</li>
+                    <li>Distributed PLC Network</li>
+                    <li>HMI Perspective Interfaces</li>
+                    <li>SCADA Monitoring & Control</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>🤖 PLC Controllers</h3>
+                <p>Each repository area has its own dedicated Programmable Logic Controller managing file operations and system metrics.</p>
+                <ul>
+                    <li>Client Area PLC - Frontend monitoring</li>
+                    <li>Server Area PLC - Backend operations</li>
+                    <li>Shared Resources PLC - Common assets</li>
+                    <li>Components PLC - UI component tracking</li>
+                    <li>Services PLC - Microservice management</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>📟 HMI Interfaces</h3>
+                <p>Human-Machine Interfaces provide real-time visualization and control of file system operations using Perspective JSON views.</p>
+                <ul>
+                    <li>Real-time file count monitoring</li>
+                    <li>Directory size tracking</li>
+                    <li>Processing load indicators</li>
+                    <li>Status visualization</li>
+                    <li>Interactive control panels</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>🔗 MQTT Communication</h3>
+                <p>Authentic industrial protocol enables machine-to-machine communication between PLCs and the central SCADA system.</p>
+                <ul>
+                    <li>PLC telemetry publishing</li>
+                    <li>Alarm notification system</li>
+                    <li>Command distribution</li>
+                    <li>Status synchronization</li>
+                    <li>Graceful WebSocket fallback</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>📊 Local File Path API</h3>
+                <p>Authentic file system operations at the lowest level provide real data instead of mock implementations.</p>
+                <ul>
+                    <li>Directory scanning with metadata</li>
+                    <li>File content reading/writing</li>
+                    <li>Permission and checksum analysis</li>
+                    <li>Search functionality</li>
+                    <li>Copy/delete operations</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>🎛️ SCADA Control Center</h3>
+                <p>Supervisory Control and Data Acquisition system for monitoring all PLC operations and managing alarms.</p>
+                <ul>
+                    <li>Centralized alarm management</li>
+                    <li>System metrics dashboard</li>
+                    <li>Emergency stop capabilities</li>
+                    <li>Historical data logging</li>
+                    <li>Performance optimization</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="terminal">
+            <div class="terminal-header">SYSTEM ARCHITECTURE:</div>
+            <div class="terminal-content">Enterprise/Site1/
+├── ClientArea/PLC1     → Frontend monitoring & control
+├── ServerArea/PLC2     → Backend services management  
+├── SharedArea/PLC3     → Common resource coordination
+├── ComponentsArea/PLC4 → UI component tracking
+├── ServicesArea/PLC5   → Microservice operations
+├── TypesArea/PLC6      → Type definition management
+├── HooksArea/PLC7      → React hooks monitoring
+├── PagesArea/PLC8      → Page component control
+├── AssetsArea/PLC9     → Asset management system
+└── WorkspaceArea/PLC10 → Development workspace control
+
+Communication Flow:
+PLCs → MQTT/WebSocket → Virtual Gateway → UNS Tags → HMI Interfaces → SCADA Monitor</div>
+        </div>
+
+        <div class="links">
+            <a href=".hmi/index.html" class="btn">View Root HMI Interface</a>
+            <a href=".plc/plc-config.json" class="btn">PLC Configuration</a>
+            <a href="https://github.com/your-repo" class="btn">View Source Code</a>
+        </div>
+
+        <div class="terminal">
+            <div class="terminal-header">WHY INDUSTRIAL AUTOMATION FOR FILES?</div>
+            <div class="terminal-content">Traditional file management lacks the robust monitoring, control, and automation capabilities found in industrial systems. This project demonstrates how proven SCADA/HMI/PLC architecture can revolutionize repository operations:
+
+✓ Real-time monitoring of file system changes
+✓ Automated alarm generation for critical events  
+✓ Distributed control across repository areas
+✓ Centralized SCADA supervision
+✓ Industrial-grade communication protocols
+✓ Authentic data integration at lowest level
+✓ Scalable architecture for complex systems
+
+The result is a file management system with the reliability, monitoring, and control capabilities of industrial automation platforms.</div>
+        </div>
+
+        <footer class="footer">
+            <p>Industrial Automation File Management System | Advanced HMI-PLC-SCADA Architecture</p>
+            <p>Authentic file system operations with distributed PLC controllers and MQTT communication</p>
+        </footer>
+    </div>
+
+    <script>
+        // Add some industrial automation styling effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simulate real-time status updates
+            setInterval(function() {
+                const lights = document.querySelectorAll('.status-light');
+                lights.forEach(light => {
+                    light.style.boxShadow = `0 0 ${Math.random() * 20 + 5}px #00ff41`;
+                });
+            }, 2000);
+
+            // Add terminal-like typing effect
+            const terminal = document.querySelector('.terminal-content');
+            if (terminal) {
+                terminal.style.borderRight = '2px solid #00ff41';
+                setInterval(function() {
+                    terminal.style.borderRight = terminal.style.borderRight === 'none' ? '2px solid #00ff41' : 'none';
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>

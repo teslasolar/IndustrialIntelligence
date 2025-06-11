@@ -1,0 +1,164 @@
+{
+  "plcId": "ROOT_ENTERPRISE_PLC",
+  "areaName": "Enterprise Root",
+  "controlPath": ".",
+  "model": "Industrial File Controller v2.1",
+  "firmware": "IFC-2024.1",
+  "scanRate": 100,
+  "ipAddress": "192.168.1.100",
+  "port": 502,
+  "status": "Running",
+  "lastModified": "2025-06-11T15:32:00.000Z",
+  "fileCount": 847,
+  "directorySize": "45.2",
+  "processingLoad": "23.4",
+  "systemMetrics": {
+    "cpuUsage": 28.5,
+    "memoryUsage": 64.2,
+    "diskIO": 1.2,
+    "networkTraffic": 0.8,
+    "operationsPerMinute": 15,
+    "queueDepth": 4,
+    "efficiency": 94.2
+  },
+  "ioMapping": {
+    "digitalInputs": {
+      "DI001": "Emergency Stop Button",
+      "DI002": "Auto Mode Selector",
+      "DI003": "Manual Override",
+      "DI004": "System Ready",
+      "DI005": "Backup Power Status"
+    },
+    "digitalOutputs": {
+      "DO001": "System Status LED",
+      "DO002": "Alarm Horn",
+      "DO003": "Process Running LED",
+      "DO004": "Maintenance Required LED",
+      "DO005": "Communication Active LED"
+    },
+    "analogInputs": {
+      "AI001": "CPU Temperature Sensor",
+      "AI002": "Power Supply Voltage",
+      "AI003": "Network Latency Monitor",
+      "AI004": "Disk Usage Sensor"
+    },
+    "analogOutputs": {
+      "AO001": "Process Control Signal",
+      "AO002": "Speed Reference",
+      "AO003": "Load Balancing Output"
+    }
+  },
+  "ladderLogic": {
+    "programs": [
+      {
+        "name": "Main_Scan",
+        "description": "Primary directory scanning routine",
+        "rungs": 15,
+        "cycleTime": "2ms",
+        "lastModified": "2025-06-11T15:30:00.000Z"
+      },
+      {
+        "name": "Alarm_Handler",
+        "description": "System alarm processing and notification",
+        "rungs": 8,
+        "cycleTime": "1ms",
+        "lastModified": "2025-06-11T15:25:00.000Z"
+      },
+      {
+        "name": "File_Operations",
+        "description": "File system operation control logic",
+        "rungs": 22,
+        "cycleTime": "5ms",
+        "lastModified": "2025-06-11T15:28:00.000Z"
+      }
+    ]
+  },
+  "alarms": [
+    {
+      "id": "ALM001",
+      "type": "WARNING",
+      "message": "Processing load above 80%",
+      "priority": 3,
+      "active": false,
+      "acknowledged": true,
+      "timestamp": "2025-06-11T15:20:15.000Z"
+    },
+    {
+      "id": "ALM002", 
+      "type": "INFO",
+      "message": "Scheduled maintenance due in 7 days",
+      "priority": 1,
+      "active": true,
+      "acknowledged": false,
+      "timestamp": "2025-06-11T15:32:00.000Z"
+    }
+  ],
+  "communicationSettings": {
+    "mqtt": {
+      "broker": "mqtt://localhost:1883",
+      "clientId": "ROOT_ENTERPRISE_PLC",
+      "topics": {
+        "telemetry": "industrial/plc/ROOT_ENTERPRISE_PLC/telemetry",
+        "status": "industrial/plc/ROOT_ENTERPRISE_PLC/status",
+        "commands": "industrial/commands/ROOT_ENTERPRISE_PLC",
+        "alarms": "industrial/alarms/ROOT_ENTERPRISE_PLC"
+      },
+      "qos": 1,
+      "retainMessages": true
+    },
+    "modbus": {
+      "enabled": true,
+      "slaveId": 1,
+      "baudRate": 9600,
+      "parity": "none",
+      "stopBits": 1,
+      "dataBits": 8
+    }
+  },
+  "securitySettings": {
+    "accessLevel": "Administrator",
+    "encryptionEnabled": true,
+    "certificateThumbprint": "A1B2C3D4E5F6789012345678901234567890ABCD",
+    "lastSecurityAudit": "2025-06-01T10:00:00.000Z",
+    "failedLoginAttempts": 0,
+    "sessionTimeout": 1800
+  },
+  "maintenanceSchedule": {
+    "nextScheduledMaintenance": "2025-06-18T02:00:00.000Z",
+    "maintenanceInterval": "weekly",
+    "lastMaintenance": "2025-06-04T02:00:00.000Z",
+    "maintenanceTasks": [
+      "Directory structure optimization",
+      "Cache cleanup and defragmentation", 
+      "Security certificate renewal",
+      "Performance baseline verification",
+      "Backup system integrity check"
+    ]
+  },
+  "networkConfiguration": {
+    "primaryInterface": {
+      "name": "eth0",
+      "ipAddress": "192.168.1.100",
+      "subnetMask": "255.255.255.0",
+      "gateway": "192.168.1.1",
+      "dns": ["8.8.8.8", "8.8.4.4"]
+    },
+    "redundantInterface": {
+      "name": "eth1", 
+      "ipAddress": "192.168.2.100",
+      "subnetMask": "255.255.255.0",
+      "gateway": "192.168.2.1",
+      "enabled": false
+    }
+  },
+  "operationalData": {
+    "totalOperatingHours": 8760,
+    "filesProcessedToday": 1247,
+    "averageResponseTime": "15ms",
+    "peakProcessingLoad": "87.3%",
+    "systemUptime": "99.97%",
+    "dataIntegrityChecks": "PASSED",
+    "backupStatus": "CURRENT",
+    "lastSystemRestart": "2025-05-15T03:00:00.000Z"
+  }
+}
