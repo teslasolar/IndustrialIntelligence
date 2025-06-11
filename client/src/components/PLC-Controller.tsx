@@ -53,13 +53,22 @@ export function PLCController({
     return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
   };
 
-  const formatTime = (date: Date): string => {
-    return new Intl.DateTimeFormat('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false,
-    }).format(new Date(date));
+  const formatTime = (date: Date | string | null): string => {
+    if (!date) return '--:--:--';
+    
+    try {
+      const dateObj = date instanceof Date ? date : new Date(date);
+      if (isNaN(dateObj.getTime())) return '--:--:--';
+      
+      return new Intl.DateTimeFormat('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      }).format(dateObj);
+    } catch (error) {
+      return '--:--:--';
+    }
   };
 
   const getOperationIcon = (type: string) => {
@@ -203,7 +212,10 @@ export function PLCController({
                             <span className="font-mono text-sm">{file.name}</span>
                           </div>
                           <div className="col-span-2 flex items-center">
-                            <StatusIndicator status={file.status} size="sm" />
+                            <StatusIndicator 
+                              status={file.status === 'modified' ? 'warning' : file.status as any} 
+                              size="sm" 
+                            />
                             <span className="text-xs font-mono text-gray-300 ml-2">
                               {file.status.toUpperCase()}
                             </span>
