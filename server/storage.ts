@@ -1,12 +1,16 @@
 import { 
-  users, directories, files, fileOperations, systemAlarms, systemMetrics,
+  users,
   type User, type InsertUser,
-  type Directory, type InsertDirectory,
-  type File, type InsertFile,
-  type FileOperation, type InsertFileOperation,
-  type SystemAlarm, type InsertSystemAlarm,
-  type SystemMetrics, type InsertSystemMetrics
+  type UnsNode, type InsertUnsNode,
+  type UnsTag, type InsertUnsTag,
+  type PerspectiveView, type InsertPerspectiveView,
+  type TagGroup, type InsertTagGroup,
+  type TagHistory, type InsertTagHistory,
+  type TagAlarm, type InsertTagAlarm,
+  type SystemConfig, type InsertSystemConfig
 } from "@shared/schema";
+
+import { UnsTagService } from "./services/unsTagService";
 
 export interface IStorage {
   // User operations
@@ -14,212 +18,100 @@ export interface IStorage {
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
 
-  // Directory operations
-  getAllDirectories(): Promise<Directory[]>;
-  getDirectory(id: number): Promise<Directory | undefined>;
-  getDirectoryByPath(path: string): Promise<Directory | undefined>;
-  createDirectory(directory: InsertDirectory): Promise<Directory>;
-  updateDirectory(id: number, updates: Partial<InsertDirectory>): Promise<Directory | undefined>;
-  deleteDirectory(id: number): Promise<boolean>;
+  // UNS Node operations
+  getAllNodes(): Promise<UnsNode[]>;
+  getNode(nodeId: string): Promise<UnsNode | undefined>;
+  getChildNodes(parentNodeId: string): Promise<UnsNode[]>;
+  createNode(node: InsertUnsNode): Promise<UnsNode>;
 
-  // File operations
-  getFilesByDirectory(directoryId: number): Promise<File[]>;
-  getFile(id: number): Promise<File | undefined>;
-  getFileByPath(path: string): Promise<File | undefined>;
-  createFile(file: InsertFile): Promise<File>;
-  updateFile(id: number, updates: Partial<InsertFile>): Promise<File | undefined>;
-  deleteFile(id: number): Promise<boolean>;
+  // UNS Tag operations
+  getAllTags(): Promise<UnsTag[]>;
+  getTag(tagPath: string): Promise<UnsTag | undefined>;
+  getTagsByNode(nodeId: string): Promise<UnsTag[]>;
+  updateTagValue(tagPath: string, value: string, quality?: string): Promise<UnsTag | undefined>;
+  createTag(tag: InsertUnsTag): Promise<UnsTag>;
 
-  // File operation queue
-  getAllFileOperations(): Promise<FileOperation[]>;
-  getPendingFileOperations(): Promise<FileOperation[]>;
-  createFileOperation(operation: InsertFileOperation): Promise<FileOperation>;
-  updateFileOperation(id: number, updates: Partial<InsertFileOperation>): Promise<FileOperation | undefined>;
+  // Tag History operations
+  getTagHistory(tagPath: string, limit?: number): Promise<TagHistory[]>;
+  addTagHistory(history: InsertTagHistory): Promise<TagHistory>;
 
-  // System alarms
-  getAllAlarms(): Promise<SystemAlarm[]>;
-  getActiveAlarms(): Promise<SystemAlarm[]>;
-  createAlarm(alarm: InsertSystemAlarm): Promise<SystemAlarm>;
-  acknowledgeAlarm(id: number): Promise<SystemAlarm | undefined>;
+  // Alarm operations
+  getAllAlarms(): Promise<TagAlarm[]>;
+  getActiveAlarms(): Promise<TagAlarm[]>;
+  getAlarm(alarmPath: string): Promise<TagAlarm | undefined>;
+  acknowledgeAlarm(alarmPath: string): Promise<TagAlarm | undefined>;
+  createAlarm(alarm: InsertTagAlarm): Promise<TagAlarm>;
 
-  // System metrics
-  getLatestMetrics(): Promise<SystemMetrics | undefined>;
-  createMetrics(metrics: InsertSystemMetrics): Promise<SystemMetrics>;
-  getMetricsHistory(limit?: number): Promise<SystemMetrics[]>;
+  // Perspective View operations
+  getAllViews(): Promise<PerspectiveView[]>;
+  getView(viewPath: string): Promise<PerspectiveView | undefined>;
+  getViewsByParent(parentPath: string): Promise<PerspectiveView[]>;
+  createView(view: InsertPerspectiveView): Promise<PerspectiveView>;
+
+  // System Configuration operations
+  getConfig(configPath: string): Promise<SystemConfig | undefined>;
+  getAllConfigs(): Promise<SystemConfig[]>;
+  setConfig(config: InsertSystemConfig): Promise<SystemConfig>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
-  private directories: Map<number, Directory>;
-  private files: Map<number, File>;
-  private fileOperations: Map<number, FileOperation>;
-  private systemAlarms: Map<number, SystemAlarm>;
-  private systemMetrics: Map<number, SystemMetrics>;
+  private unsTagService: UnsTagService;
+  private configs: Map<string, SystemConfig>;
   private currentId: number;
 
   constructor() {
     this.users = new Map();
-    this.directories = new Map();
-    this.files = new Map();
-    this.fileOperations = new Map();
-    this.systemAlarms = new Map();
-    this.systemMetrics = new Map();
+    this.configs = new Map();
     this.currentId = 1;
+    this.unsTagService = new UnsTagService();
     this.initializeDefaultData();
+    
+    // Start real-time tag simulation
+    this.unsTagService.simulateTagUpdates();
   }
 
   private initializeDefaultData() {
-    // Create root directory
-    const rootDir: Directory = {
-      id: this.currentId++,
-      name: "root",
-      path: "/",
-      parentId: null,
-      fileCount: 2,
-      status: "active",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.directories.set(rootDir.id, rootDir);
-
-    // Create projects directory
-    const projectsDir: Directory = {
-      id: this.currentId++,
-      name: "projects",
-      path: "/projects",
-      parentId: rootDir.id,
-      fileCount: 1,
-      status: "active",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.directories.set(projectsDir.id, projectsDir);
-
-    // Create automation-system directory
-    const automationDir: Directory = {
-      id: this.currentId++,
-      name: "automation-system",
-      path: "/projects/automation-system",
-      parentId: projectsDir.id,
-      fileCount: 12,
-      status: "active",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.directories.set(automationDir.id, automationDir);
-
-    // Create src directory
-    const srcDir: Directory = {
-      id: this.currentId++,
-      name: "src",
-      path: "/projects/automation-system/src",
-      parentId: automationDir.id,
-      fileCount: 3,
-      status: "active",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.directories.set(srcDir.id, srcDir);
-
-    // Create sample files
-    const files = [
+    // Initialize system configurations
+    const defaultConfigs = [
       {
-        id: this.currentId++,
-        name: "HMI.component.jsx",
-        path: "/projects/automation-system/src/HMI.component.jsx",
-        directoryId: srcDir.id,
-        size: 2400,
-        type: "JavaScript",
-        status: "sync",
-        checksum: "a4d2c5f9...",
-        lastModified: new Date("2024-01-15T14:23:45"),
-        createdAt: new Date(),
+        configPath: "System/Gateway/Name",
+        configValue: "FileSystem_Gateway",
+        dataType: "String",
+        description: "Gateway name",
+        isReadOnly: true
       },
       {
-        id: this.currentId++,
-        name: "PLC.controller.js",
-        path: "/projects/automation-system/src/PLC.controller.js",
-        directoryId: srcDir.id,
-        size: 5800,
-        type: "JavaScript",
-        status: "conflict",
-        checksum: "b7e3f2a1...",
-        lastModified: new Date("2024-01-15T14:21:12"),
-        createdAt: new Date(),
+        configPath: "System/Gateway/Version",
+        configValue: "8.1.25",
+        dataType: "String",
+        description: "Gateway version",
+        isReadOnly: true
       },
       {
-        id: this.currentId++,
-        name: "SCADA.service.js",
-        path: "/projects/automation-system/src/SCADA.service.js",
-        directoryId: srcDir.id,
-        size: 12100,
-        type: "JavaScript",
-        status: "sync",
-        checksum: "c9f4d6b2...",
-        lastModified: new Date("2024-01-15T14:19:33"),
-        createdAt: new Date(),
+        configPath: "System/Perspective/SessionTimeout",
+        configValue: "3600",
+        dataType: "Int32",
+        description: "Session timeout in seconds",
+        isReadOnly: false
       },
       {
-        id: this.currentId++,
-        name: "package.json",
-        path: "/projects/automation-system/package.json",
-        directoryId: automationDir.id,
-        size: 1200,
-        type: "JSON",
-        status: "sync",
-        checksum: "d8e5f7c3...",
-        lastModified: new Date("2024-01-15T13:45:21"),
-        createdAt: new Date(),
-      },
+        configPath: "System/Alarms/MaxActiveAlarms",
+        configValue: "1000",
+        dataType: "Int32",
+        description: "Maximum number of active alarms",
+        isReadOnly: false
+      }
     ];
 
-    files.forEach(file => this.files.set(file.id, file));
-
-    // Create sample alarms
-    const alarms = [
-      {
+    defaultConfigs.forEach(config => {
+      const systemConfig: SystemConfig = {
         id: this.currentId++,
-        type: "FILE_CONFLICT",
-        message: "FILE CONFLICT",
-        location: "PLC.controller.js",
-        severity: "error" as const,
-        acknowledged: false,
-        createdAt: new Date("2024-01-15T14:21:00"),
-      },
-      {
-        id: this.currentId++,
-        type: "HIGH_MEM_USAGE",
-        message: "HIGH MEM USAGE",
-        location: "System Resources",
-        severity: "warning" as const,
-        acknowledged: false,
-        createdAt: new Date("2024-01-15T14:18:00"),
-      },
-      {
-        id: this.currentId++,
-        type: "SYNC_TIMEOUT",
-        message: "SYNC TIMEOUT",
-        location: "shared/utilities/",
-        severity: "warning" as const,
-        acknowledged: false,
-        createdAt: new Date("2024-01-15T14:15:00"),
-      },
-    ];
-
-    alarms.forEach(alarm => this.systemAlarms.set(alarm.id, alarm));
-
-    // Create initial metrics
-    const metrics: SystemMetrics = {
-      id: this.currentId++,
-      cpuUsage: 23,
-      memoryUsage: 67,
-      diskIO: 41,
-      throughput: 1200, // KB/s
-      operationsPerMin: 847,
-      errorRate: 30, // 0.3% * 100
-      timestamp: new Date(),
-    };
-    this.systemMetrics.set(metrics.id, metrics);
+        ...config,
+        updatedAt: new Date(),
+      };
+      this.configs.set(config.configPath, systemConfig);
+    });
   }
 
   // User operations
@@ -238,158 +130,133 @@ export class MemStorage implements IStorage {
     return user;
   }
 
-  // Directory operations
-  async getAllDirectories(): Promise<Directory[]> {
-    return Array.from(this.directories.values());
+  // UNS Node operations
+  async getAllNodes(): Promise<UnsNode[]> {
+    return this.unsTagService.getAllNodes();
   }
 
-  async getDirectory(id: number): Promise<Directory | undefined> {
-    return this.directories.get(id);
+  async getNode(nodeId: string): Promise<UnsNode | undefined> {
+    return this.unsTagService.getNode(nodeId);
   }
 
-  async getDirectoryByPath(path: string): Promise<Directory | undefined> {
-    return Array.from(this.directories.values()).find(dir => dir.path === path);
+  async getChildNodes(parentNodeId: string): Promise<UnsNode[]> {
+    return this.unsTagService.getChildNodes(parentNodeId);
   }
 
-  async createDirectory(insertDirectory: InsertDirectory): Promise<Directory> {
-    const id = this.currentId++;
-    const directory: Directory = {
-      ...insertDirectory,
-      id,
+  async createNode(node: InsertUnsNode): Promise<UnsNode> {
+    return this.unsTagService.createNode(node);
+  }
+
+  // UNS Tag operations
+  async getAllTags(): Promise<UnsTag[]> {
+    return this.unsTagService.getAllTags();
+  }
+
+  async getTag(tagPath: string): Promise<UnsTag | undefined> {
+    return this.unsTagService.getTag(tagPath);
+  }
+
+  async getTagsByNode(nodeId: string): Promise<UnsTag[]> {
+    return this.unsTagService.getTagsByNode(nodeId);
+  }
+
+  async updateTagValue(tagPath: string, value: string, quality = "Good"): Promise<UnsTag | undefined> {
+    return this.unsTagService.updateTagValue(tagPath, value, quality);
+  }
+
+  async createTag(tag: InsertUnsTag): Promise<UnsTag> {
+    return this.unsTagService.createTag(tag);
+  }
+
+  // Tag History operations (simplified for now)
+  async getTagHistory(tagPath: string, limit = 100): Promise<TagHistory[]> {
+    // In a real implementation, this would query historical data
+    return [];
+  }
+
+  async addTagHistory(history: InsertTagHistory): Promise<TagHistory> {
+    const tagHistory: TagHistory = {
+      id: this.currentId++,
+      ...history,
+    };
+    return tagHistory;
+  }
+
+  // Alarm operations
+  async getAllAlarms(): Promise<TagAlarm[]> {
+    return this.unsTagService.getAlarms();
+  }
+
+  async getActiveAlarms(): Promise<TagAlarm[]> {
+    return this.unsTagService.getActiveAlarms();
+  }
+
+  async getAlarm(alarmPath: string): Promise<TagAlarm | undefined> {
+    const alarms = await this.getAllAlarms();
+    return alarms.find(alarm => alarm.alarmPath === alarmPath);
+  }
+
+  async acknowledgeAlarm(alarmPath: string): Promise<TagAlarm | undefined> {
+    return this.unsTagService.acknowledgeAlarm(alarmPath);
+  }
+
+  async createAlarm(alarm: InsertTagAlarm): Promise<TagAlarm> {
+    const tagAlarm: TagAlarm = {
+      id: this.currentId++,
+      ...alarm,
+      activeTime: null,
+      ackTime: null,
+      clearedTime: null,
+    };
+    return tagAlarm;
+  }
+
+  // Perspective View operations
+  async getAllViews(): Promise<PerspectiveView[]> {
+    return this.unsTagService.getAllViews();
+  }
+
+  async getView(viewPath: string): Promise<PerspectiveView | undefined> {
+    return this.unsTagService.getView(viewPath);
+  }
+
+  async getViewsByParent(parentPath: string): Promise<PerspectiveView[]> {
+    return this.unsTagService.getViewsByParent(parentPath);
+  }
+
+  async createView(view: InsertPerspectiveView): Promise<PerspectiveView> {
+    const perspectiveView: PerspectiveView = {
+      id: this.currentId++,
+      ...view,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
-    this.directories.set(id, directory);
-    return directory;
+    return perspectiveView;
   }
 
-  async updateDirectory(id: number, updates: Partial<InsertDirectory>): Promise<Directory | undefined> {
-    const directory = this.directories.get(id);
-    if (!directory) return undefined;
-    
-    const updated: Directory = {
-      ...directory,
-      ...updates,
+  // System Configuration operations
+  async getConfig(configPath: string): Promise<SystemConfig | undefined> {
+    return this.configs.get(configPath);
+  }
+
+  async getAllConfigs(): Promise<SystemConfig[]> {
+    return Array.from(this.configs.values());
+  }
+
+  async setConfig(config: InsertSystemConfig): Promise<SystemConfig> {
+    const existing = this.configs.get(config.configPath);
+    if (existing && existing.isReadOnly) {
+      throw new Error(`Configuration ${config.configPath} is read-only`);
+    }
+
+    const systemConfig: SystemConfig = {
+      id: existing?.id || this.currentId++,
+      ...config,
       updatedAt: new Date(),
     };
-    this.directories.set(id, updated);
-    return updated;
-  }
-
-  async deleteDirectory(id: number): Promise<boolean> {
-    return this.directories.delete(id);
-  }
-
-  // File operations
-  async getFilesByDirectory(directoryId: number): Promise<File[]> {
-    return Array.from(this.files.values()).filter(file => file.directoryId === directoryId);
-  }
-
-  async getFile(id: number): Promise<File | undefined> {
-    return this.files.get(id);
-  }
-
-  async getFileByPath(path: string): Promise<File | undefined> {
-    return Array.from(this.files.values()).find(file => file.path === path);
-  }
-
-  async createFile(insertFile: InsertFile): Promise<File> {
-    const id = this.currentId++;
-    const file: File = { ...insertFile, id, createdAt: new Date() };
-    this.files.set(id, file);
-    return file;
-  }
-
-  async updateFile(id: number, updates: Partial<InsertFile>): Promise<File | undefined> {
-    const file = this.files.get(id);
-    if (!file) return undefined;
     
-    const updated: File = { ...file, ...updates };
-    this.files.set(id, updated);
-    return updated;
-  }
-
-  async deleteFile(id: number): Promise<boolean> {
-    return this.files.delete(id);
-  }
-
-  // File operation queue
-  async getAllFileOperations(): Promise<FileOperation[]> {
-    return Array.from(this.fileOperations.values());
-  }
-
-  async getPendingFileOperations(): Promise<FileOperation[]> {
-    return Array.from(this.fileOperations.values()).filter(op => op.status === "pending");
-  }
-
-  async createFileOperation(insertOperation: InsertFileOperation): Promise<FileOperation> {
-    const id = this.currentId++;
-    const operation: FileOperation = {
-      ...insertOperation,
-      id,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.fileOperations.set(id, operation);
-    return operation;
-  }
-
-  async updateFileOperation(id: number, updates: Partial<InsertFileOperation>): Promise<FileOperation | undefined> {
-    const operation = this.fileOperations.get(id);
-    if (!operation) return undefined;
-    
-    const updated: FileOperation = {
-      ...operation,
-      ...updates,
-      updatedAt: new Date(),
-    };
-    this.fileOperations.set(id, updated);
-    return updated;
-  }
-
-  // System alarms
-  async getAllAlarms(): Promise<SystemAlarm[]> {
-    return Array.from(this.systemAlarms.values());
-  }
-
-  async getActiveAlarms(): Promise<SystemAlarm[]> {
-    return Array.from(this.systemAlarms.values()).filter(alarm => !alarm.acknowledged);
-  }
-
-  async createAlarm(insertAlarm: InsertSystemAlarm): Promise<SystemAlarm> {
-    const id = this.currentId++;
-    const alarm: SystemAlarm = { ...insertAlarm, id, createdAt: new Date() };
-    this.systemAlarms.set(id, alarm);
-    return alarm;
-  }
-
-  async acknowledgeAlarm(id: number): Promise<SystemAlarm | undefined> {
-    const alarm = this.systemAlarms.get(id);
-    if (!alarm) return undefined;
-    
-    const updated: SystemAlarm = { ...alarm, acknowledged: true };
-    this.systemAlarms.set(id, updated);
-    return updated;
-  }
-
-  // System metrics
-  async getLatestMetrics(): Promise<SystemMetrics | undefined> {
-    const metrics = Array.from(this.systemMetrics.values());
-    return metrics.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())[0];
-  }
-
-  async createMetrics(insertMetrics: InsertSystemMetrics): Promise<SystemMetrics> {
-    const id = this.currentId++;
-    const metrics: SystemMetrics = { ...insertMetrics, id, timestamp: new Date() };
-    this.systemMetrics.set(id, metrics);
-    return metrics;
-  }
-
-  async getMetricsHistory(limit: number = 10): Promise<SystemMetrics[]> {
-    const metrics = Array.from(this.systemMetrics.values());
-    return metrics
-      .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
-      .slice(0, limit);
+    this.configs.set(config.configPath, systemConfig);
+    return systemConfig;
   }
 }
 

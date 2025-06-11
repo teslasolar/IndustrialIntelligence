@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, jsonb, real } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -8,60 +8,92 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
 });
 
-export const directories = pgTable("directories", {
+// UNS Tag Structure - Unified Namespace for Industrial IoT
+export const unsNodes = pgTable("uns_nodes", {
   id: serial("id").primaryKey(),
+  nodeId: text("node_id").notNull().unique(), // e.g., "Enterprise/Site/Area/Line/Cell/Device"
+  parentNodeId: text("parent_node_id"),
   name: text("name").notNull(),
-  path: text("path").notNull().unique(),
-  parentId: integer("parent_id"),
-  fileCount: integer("file_count").default(0),
-  status: text("status").notNull().default("active"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
-export const files = pgTable("files", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  path: text("path").notNull().unique(),
-  directoryId: integer("directory_id").notNull(),
-  size: integer("size").notNull(),
-  type: text("type").notNull(),
-  status: text("status").notNull().default("sync"),
-  checksum: text("checksum"),
-  lastModified: timestamp("last_modified").defaultNow(),
-  createdAt: timestamp("created_at").defaultNow(),
-});
-
-export const fileOperations = pgTable("file_operations", {
-  id: serial("id").primaryKey(),
-  type: text("type").notNull(), // COPY_FILE, VALIDATE_PERM, BACKUP_DIR, etc.
-  target: text("target").notNull(),
-  status: text("status").notNull().default("pending"), // pending, running, completed, failed
-  progress: integer("progress").default(0),
+  nodeType: text("node_type").notNull(), // Enterprise, Site, Area, Line, Cell, Device, Component
+  description: text("description"),
   metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const systemAlarms = pgTable("system_alarms", {
+export const unsTags = pgTable("uns_tags", {
   id: serial("id").primaryKey(),
-  type: text("type").notNull(), // FILE_CONFLICT, HIGH_MEM_USAGE, SYNC_TIMEOUT
-  message: text("message").notNull(),
-  location: text("location"),
-  severity: text("severity").notNull().default("warning"), // info, warning, error, critical
-  acknowledged: boolean("acknowledged").default(false),
+  tagPath: text("tag_path").notNull().unique(), // Full UNS path like "Enterprise/Site1/Area1/PLC1/FileSystem/Status"
+  nodeId: text("node_id").notNull(), // Reference to UNS node
+  tagName: text("tag_name").notNull(),
+  dataType: text("data_type").notNull(), // String, Int32, Float32, Boolean, DateTime, JSON
+  value: text("value"), // Stored as text, parsed based on dataType
+  quality: text("quality").notNull().default("Good"), // Good, Bad, Uncertain
+  timestamp: timestamp("timestamp").defaultNow(),
+  historize: boolean("historize").default(false),
+  metadata: jsonb("metadata"),
+});
+
+// Perspective Views - JSON view definitions
+export const perspectiveViews = pgTable("perspective_views", {
+  id: serial("id").primaryKey(),
+  viewPath: text("view_path").notNull().unique(), // e.g., "FileSystem/HMI/DirectoryBrowser"
+  viewName: text("view_name").notNull(),
+  viewType: text("view_type").notNull(), // Page, Container, Popup, Template
+  viewDefinition: jsonb("view_definition").notNull(), // Full Perspective JSON definition
+  parentPath: text("parent_path"),
+  isEnabled: boolean("is_enabled").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Tag Groups for organizing related tags
+export const tagGroups = pgTable("tag_groups", {
+  id: serial("id").primaryKey(),
+  groupPath: text("group_path").notNull().unique(),
+  groupName: text("group_name").notNull(),
+  parentGroupPath: text("parent_group_path"),
+  description: text("description"),
+  scanClass: text("scan_class").default("Default"), // Direct, Default, Historical, etc.
+  metadata: jsonb("metadata"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-export const systemMetrics = pgTable("system_metrics", {
+// Historical data for tag values
+export const tagHistory = pgTable("tag_history", {
   id: serial("id").primaryKey(),
-  cpuUsage: integer("cpu_usage").notNull(),
-  memoryUsage: integer("memory_usage").notNull(),
-  diskIO: integer("disk_io").notNull(),
-  throughput: integer("throughput").notNull(), // in KB/s
-  operationsPerMin: integer("operations_per_min").notNull(),
-  errorRate: integer("error_rate").notNull(), // percentage * 100
-  timestamp: timestamp("timestamp").defaultNow(),
+  tagPath: text("tag_path").notNull(),
+  value: text("value").notNull(),
+  quality: text("quality").notNull(),
+  timestamp: timestamp("timestamp").notNull(),
+});
+
+// Alarms based on tag conditions
+export const tagAlarms = pgTable("tag_alarms", {
+  id: serial("id").primaryKey(),
+  alarmPath: text("alarm_path").notNull().unique(),
+  tagPath: text("tag_path").notNull(),
+  alarmType: text("alarm_type").notNull(), // AnalogHiHi, AnalogHi, AnalogLo, AnalogLoLo, Digital, Deadband
+  condition: text("condition").notNull(), // JSON condition definition
+  priority: integer("priority").default(500), // 0-999, higher is more critical
+  isActive: boolean("is_active").default(false),
+  isAcknowledged: boolean("is_acknowledged").default(false),
+  message: text("message").notNull(),
+  activeTime: timestamp("active_time"),
+  ackTime: timestamp("ack_time"),
+  clearedTime: timestamp("cleared_time"),
+  metadata: jsonb("metadata"),
+});
+
+// System configuration for SCADA
+export const systemConfig = pgTable("system_config", {
+  id: serial("id").primaryKey(),
+  configPath: text("config_path").notNull().unique(),
+  configValue: text("config_value").notNull(),
+  dataType: text("data_type").notNull(),
+  description: text("description"),
+  isReadOnly: boolean("is_read_only").default(false),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 // Insert schemas
@@ -70,48 +102,62 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
 });
 
-export const insertDirectorySchema = createInsertSchema(directories).omit({
+export const insertUnsNodeSchema = createInsertSchema(unsNodes).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
 });
 
-export const insertFileSchema = createInsertSchema(files).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertFileOperationSchema = createInsertSchema(fileOperations).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertSystemAlarmSchema = createInsertSchema(systemAlarms).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertSystemMetricsSchema = createInsertSchema(systemMetrics).omit({
+export const insertUnsTagSchema = createInsertSchema(unsTags).omit({
   id: true,
   timestamp: true,
+});
+
+export const insertPerspectiveViewSchema = createInsertSchema(perspectiveViews).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTagGroupSchema = createInsertSchema(tagGroups).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertTagHistorySchema = createInsertSchema(tagHistory).omit({
+  id: true,
+});
+
+export const insertTagAlarmSchema = createInsertSchema(tagAlarms).omit({
+  id: true,
+});
+
+export const insertSystemConfigSchema = createInsertSchema(systemConfig).omit({
+  id: true,
+  updatedAt: true,
 });
 
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 
-export type Directory = typeof directories.$inferSelect;
-export type InsertDirectory = z.infer<typeof insertDirectorySchema>;
+export type UnsNode = typeof unsNodes.$inferSelect;
+export type InsertUnsNode = z.infer<typeof insertUnsNodeSchema>;
 
-export type File = typeof files.$inferSelect;
-export type InsertFile = z.infer<typeof insertFileSchema>;
+export type UnsTag = typeof unsTags.$inferSelect;
+export type InsertUnsTag = z.infer<typeof insertUnsTagSchema>;
 
-export type FileOperation = typeof fileOperations.$inferSelect;
-export type InsertFileOperation = z.infer<typeof insertFileOperationSchema>;
+export type PerspectiveView = typeof perspectiveViews.$inferSelect;
+export type InsertPerspectiveView = z.infer<typeof insertPerspectiveViewSchema>;
 
-export type SystemAlarm = typeof systemAlarms.$inferSelect;
-export type InsertSystemAlarm = z.infer<typeof insertSystemAlarmSchema>;
+export type TagGroup = typeof tagGroups.$inferSelect;
+export type InsertTagGroup = z.infer<typeof insertTagGroupSchema>;
 
-export type SystemMetrics = typeof systemMetrics.$inferSelect;
-export type InsertSystemMetrics = z.infer<typeof insertSystemMetricsSchema>;
+export type TagHistory = typeof tagHistory.$inferSelect;
+export type InsertTagHistory = z.infer<typeof insertTagHistorySchema>;
+
+export type TagAlarm = typeof tagAlarms.$inferSelect;
+export type InsertTagAlarm = z.infer<typeof insertTagAlarmSchema>;
+
+export type SystemConfig = typeof systemConfig.$inferSelect;
+export type InsertSystemConfig = z.infer<typeof insertSystemConfigSchema>;

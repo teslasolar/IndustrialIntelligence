@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Factory, Bell, User } from 'lucide-react';
+import { Factory, Bell, User, Database } from 'lucide-react';
 import { StatusIndicator } from '../components/StatusIndicator';
 import { HMIPanel } from '../components/HMI-Panel';
 import { PLCController } from '../components/PLC-Controller';
 import { SCADAMonitor } from '../components/SCADA-Monitor';
+import { UnsTagBrowser } from '../components/UNS-TagBrowser';
 import { useFileSystem } from '../hooks/useFileSystem';
 import { useToast } from '@/hooks/use-toast';
 
@@ -152,7 +153,7 @@ export default function Dashboard() {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
               <Factory className="text-industrial-blue text-xl" />
-              <h1 className="font-mono font-bold text-lg">INDUSTRIAL FILE SYSTEM</h1>
+              <h1 className="font-mono font-bold text-lg">INDUCTIVE AUTOMATION SCADA</h1>
             </div>
             <div className="flex items-center space-x-2 text-sm">
               <StatusIndicator status={isConnected ? 'online' : 'offline'} animate />
@@ -195,7 +196,29 @@ export default function Dashboard() {
       </header>
 
       <div className="flex h-[calc(100vh-64px)]">
-        {/* HMI Panel - Left Sidebar */}
+        {/* UNS Tag Browser - Left Panel */}
+        <UnsTagBrowser
+          onSelectNode={(node) => {
+            toast({
+              title: "UNS Node Selected",
+              description: `Selected node: ${node.name} (${node.nodeType})`,
+            });
+          }}
+          onSelectTag={(tag) => {
+            toast({
+              title: "Tag Selected", 
+              description: `${tag.tagName}: ${tag.value} (${tag.quality})`,
+            });
+          }}
+          onSelectView={(view) => {
+            toast({
+              title: "Perspective View Selected",
+              description: `View: ${view.viewName} (${view.viewType})`,
+            });
+          }}
+        />
+
+        {/* HMI Panel - Directory Control */}
         <HMIPanel
           directories={directories}
           selectedDirectory={selectedDirectory}
@@ -226,7 +249,7 @@ export default function Dashboard() {
         {/* SCADA Monitor - Right Sidebar */}
         <SCADAMonitor
           alarms={alarms}
-          metrics={metrics}
+          metrics={metrics || null}
           isConnected={isConnected}
           onAcknowledgeAlarm={handleAcknowledgeAlarm}
           onEmergencyStop={handleEmergencyStop}

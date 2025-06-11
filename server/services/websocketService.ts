@@ -38,42 +38,114 @@ export class WebSocketService {
 
   private async handleMessage(ws: WebSocket, data: any) {
     switch (data.type) {
-      case 'GET_DIRECTORIES':
-        const directories = await storage.getAllDirectories();
-        this.sendToClient(ws, { type: 'DIRECTORIES_UPDATE', data: directories });
+      case 'GET_UNS_NODES':
+        const nodes = await storage.getAllNodes();
+        this.sendToClient(ws, { type: 'UNS_NODES_UPDATE', data: nodes });
         break;
       
-      case 'GET_FILES':
-        const files = await storage.getFilesByDirectory(data.directoryId);
-        this.sendToClient(ws, { type: 'FILES_UPDATE', data: files });
+      case 'GET_UNS_TAGS':
+        const { nodeId } = data;
+        const tags = nodeId ? await storage.getTagsByNode(nodeId) : await storage.getAllTags();
+        this.sendToClient(ws, { type: 'UNS_TAGS_UPDATE', data: tags });
+        break;
+      
+      case 'UPDATE_TAG_VALUE':
+        const { tagPath, value, quality } = data;
+        const updatedTag = await storage.updateTagValue(tagPath, value, quality);
+        if (updatedTag) {
+          this.broadcast({ type: 'TAG_VALUE_UPDATED', data: updatedTag });
+        }
         break;
       
       case 'ACKNOWLEDGE_ALARM':
-        const alarm = await storage.acknowledgeAlarm(data.alarmId);
+        const alarm = await storage.acknowledgeAlarm(data.alarmPath);
         if (alarm) {
           this.broadcast({ type: 'ALARM_ACKNOWLEDGED', data: alarm });
         }
         break;
       
-      case 'CREATE_OPERATION':
-        const operation = await storage.createFileOperation(data.operation);
-        this.broadcast({ type: 'OPERATION_CREATED', data: operation });
+      case 'GET_PERSPECTIVE_VIEWS':
+        const views = await storage.getAllViews();
+        this.sendToClient(ws, { type: 'PERSPECTIVE_VIEWS_UPDATE', data: views });
+        break;
+      
+      // Legacy compatibility
+      case 'GET_DIRECTORIES':
+        const directories = await this.getLegacyDirectories();
+        this.sendToClient(ws, { type: 'DIRECTORIES_UPDATE', data: directories });
         break;
     }
   }
 
+  private async getLegacyDirectories() {
+    const nodes = await storage.getAllNodes();
+    return nodes.map(node => ({
+      id: node.id,
+      name: node.name,
+      path: node.nodeId,
+      parentId: node.parentNodeId ? nodes.find(n => n.nodeId === node.parentNodeId)?.id || null : null,
+      fileCount: 0,
+      status: "active",
+      createdAt: node.createdAt,
+      updatedAt: node.updatedAt,
+    }));
+  }
+
   private async sendInitialData(ws: WebSocket) {
     try {
-      const [directories, alarms, metrics, operations] = await Promise.all([
-        storage.getAllDirectories(),
+      const [nodes, tags, alarms, views] = await Promise.all([
+        storage.getAllNodes(),
+        storage.getAllTags(),
         storage.getActiveAlarms(),
-        storage.getLatestMetrics(),
-        storage.getAllFileOperations(),
+        storage.getAllViews(),
       ]);
+
+      // Get metrics from system tags
+      const systemTags = await storage.getTagsByNode("Enterprise/Site1/FileSystemArea/PLC1");
+      const cpuTag = systemTags.find(tag => tag.tagName === "CpuUsage");
+      const memoryTag = systemTags.find(tag => tag.tagName === "MemoryUsage");
+      const diskTag = systemTags.find(tag => tag.tagName === "DiskIO");
+      const throughputTag = systemTags.find(tag => tag.tagName === "Throughput");
+
+      const metrics = {
+        id: 1,
+        cpuUsage: cpuTag ? parseFloat(cpuTag.value || "0") : 0,
+        memoryUsage: memoryTag ? parseFloat(memoryTag.value || "0") : 0,
+        diskIO: diskTag ? parseFloat(diskTag.value || "0") : 0,
+        throughput: throughputTag ? parseInt(throughputTag.value || "0") : 0,
+        operationsPerMin: 847,
+        errorRate: 30,
+        timestamp: new Date(),
+      };
+
+      // Legacy compatibility
+      const directories = await this.getLegacyDirectories();
+      const operations = [
+        {
+          id: 1,
+          type: "SYNC_CHANGES",
+          target: "Enterprise/Site1/FileSystemArea/PLC1",
+          status: "running",
+          progress: 75,
+        },
+        {
+          id: 2,
+          type: "BACKUP_DIR", 
+          target: "Enterprise/Site1/FileSystemArea/PLC1/FileSystem",
+          status: "pending",
+          progress: 0,
+        }
+      ];
 
       this.sendToClient(ws, {
         type: 'INITIAL_DATA',
         data: {
+          // UNS data
+          unsNodes: nodes,
+          unsTags: tags,
+          perspectiveViews: views,
+          
+          // Legacy data for compatibility
           directories,
           alarms,
           metrics,
@@ -98,39 +170,78 @@ export class WebSocketService {
   }
 
   private startPeriodicUpdates() {
-    // Update system metrics every 2 seconds
+    // Update system metrics via UNS tags every 2 seconds
     setInterval(async () => {
-      const currentMetrics = await storage.getLatestMetrics();
-      if (currentMetrics) {
-        // Simulate changing metrics
-        const newMetrics = {
-          cpuUsage: Math.max(15, Math.min(85, currentMetrics.cpuUsage + (Math.random() - 0.5) * 5)),
-          memoryUsage: Math.max(40, Math.min(90, currentMetrics.memoryUsage + (Math.random() - 0.5) * 3)),
-          diskIO: Math.max(10, Math.min(95, currentMetrics.diskIO + (Math.random() - 0.5) * 8)),
-          throughput: Math.max(500, Math.min(2500, currentMetrics.throughput + (Math.random() - 0.5) * 200)),
-          operationsPerMin: Math.max(400, Math.min(1200, currentMetrics.operationsPerMin + (Math.random() - 0.5) * 50)),
-          errorRate: Math.max(0, Math.min(500, currentMetrics.errorRate + (Math.random() - 0.5) * 10)),
+      try {
+        const systemTags = await storage.getTagsByNode("Enterprise/Site1/FileSystemArea/PLC1");
+        
+        const cpuTag = systemTags.find(tag => tag.tagName === "CpuUsage");
+        const memoryTag = systemTags.find(tag => tag.tagName === "MemoryUsage");
+        const diskTag = systemTags.find(tag => tag.tagName === "DiskIO");
+        const throughputTag = systemTags.find(tag => tag.tagName === "Throughput");
+
+        if (cpuTag) {
+          const currentValue = parseFloat(cpuTag.value || "25");
+          const newValue = Math.max(15, Math.min(85, currentValue + (Math.random() - 0.5) * 5));
+          await storage.updateTagValue(cpuTag.tagPath, newValue.toFixed(1));
+        }
+
+        if (memoryTag) {
+          const currentValue = parseFloat(memoryTag.value || "67");
+          const newValue = Math.max(40, Math.min(90, currentValue + (Math.random() - 0.5) * 3));
+          await storage.updateTagValue(memoryTag.tagPath, newValue.toFixed(1));
+        }
+
+        if (diskTag) {
+          const currentValue = parseFloat(diskTag.value || "42");
+          const newValue = Math.max(10, Math.min(95, currentValue + (Math.random() - 0.5) * 8));
+          await storage.updateTagValue(diskTag.tagPath, newValue.toFixed(1));
+        }
+
+        if (throughputTag) {
+          const currentValue = parseInt(throughputTag.value || "1200");
+          const newValue = Math.max(500, Math.min(2500, currentValue + (Math.random() - 0.5) * 200));
+          await storage.updateTagValue(throughputTag.tagPath, Math.floor(newValue).toString());
+        }
+
+        // Broadcast updated metrics in legacy format
+        const metrics = {
+          id: 1,
+          cpuUsage: cpuTag ? parseFloat(cpuTag.value || "0") : 0,
+          memoryUsage: memoryTag ? parseFloat(memoryTag.value || "0") : 0,
+          diskIO: diskTag ? parseFloat(diskTag.value || "0") : 0,
+          throughput: throughputTag ? parseInt(throughputTag.value || "0") : 0,
+          operationsPerMin: 847,
+          errorRate: 30,
+          timestamp: new Date(),
         };
 
-        const updatedMetrics = await storage.createMetrics(newMetrics);
-        this.broadcast({ type: 'METRICS_UPDATE', data: updatedMetrics });
+        this.broadcast({ type: 'METRICS_UPDATE', data: metrics });
+        this.broadcast({ type: 'UNS_TAGS_UPDATE', data: systemTags });
+      } catch (error) {
+        console.error('Error updating system metrics:', error);
       }
     }, 2000);
 
-    // Simulate file operations progress
-    setInterval(async () => {
-      const operations = await storage.getPendingFileOperations();
-      for (const operation of operations) {
-        if (operation.status === 'pending') {
-          await storage.updateFileOperation(operation.id, { status: 'running', progress: 0 });
-          this.broadcast({ type: 'OPERATION_UPDATED', data: { ...operation, status: 'running', progress: 0 } });
-        } else if (operation.status === 'running' && operation.progress < 100) {
-          const newProgress = Math.min(100, operation.progress + Math.random() * 30);
-          const status = newProgress >= 100 ? 'completed' : 'running';
-          await storage.updateFileOperation(operation.id, { progress: Math.floor(newProgress), status });
-          this.broadcast({ type: 'OPERATION_UPDATED', data: { ...operation, progress: Math.floor(newProgress), status } });
+    // Simulate mock operations for compatibility
+    setInterval(() => {
+      const operations = [
+        "COPY_FILE", "VALIDATE_PERM", "BACKUP_DIR", "SYNC_CHANGES"
+      ];
+      const randomOp = operations[Math.floor(Math.random() * operations.length)];
+      
+      console.log('New operation queued:', randomOp);
+      
+      this.broadcast({ 
+        type: 'OPERATION_CREATED', 
+        data: {
+          id: Date.now(),
+          type: randomOp,
+          target: "Enterprise/Site1/FileSystemArea/PLC1",
+          status: "pending",
+          progress: 0,
         }
-      }
-    }, 1000);
+      });
+    }, 5000);
   }
 }
