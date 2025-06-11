@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Factory, Bell, User, Database } from 'lucide-react';
+import { Factory, Bell, User, Database, Monitor, ExternalLink } from 'lucide-react';
 import { StatusIndicator } from '../components/StatusIndicator';
 import { HMIPanel } from '../components/HMI-Panel';
 import { PLCController } from '../components/PLC-Controller';
 import { SCADAMonitor } from '../components/SCADA-Monitor';
 import { UnsTagBrowser } from '../components/UNS-TagBrowser';
+import { HMIViewer } from '../components/HMI-Viewer';
 import { useFileSystem } from '../hooks/useFileSystem';
 import { useToast } from '@/hooks/use-toast';
 
@@ -196,27 +197,17 @@ export default function Dashboard() {
       </header>
 
       <div className="flex h-[calc(100vh-64px)]">
-        {/* UNS Tag Browser - Left Panel */}
-        <UnsTagBrowser
-          onSelectNode={(node) => {
-            toast({
-              title: "UNS Node Selected",
-              description: `Selected node: ${node.name} (${node.nodeType})`,
-            });
-          }}
-          onSelectTag={(tag) => {
-            toast({
-              title: "Tag Selected", 
-              description: `${tag.tagName}: ${tag.value} (${tag.quality})`,
-            });
-          }}
-          onSelectView={(view) => {
-            toast({
-              title: "Perspective View Selected",
-              description: `View: ${view.viewName} (${view.viewType})`,
-            });
-          }}
-        />
+        {/* HMI Viewer - Left Panel */}
+        <div className="w-80 border-r border-gray-600">
+          <HMIViewer
+            onViewHMI={(hmiPath) => {
+              toast({
+                title: "HMI Interface Opened",
+                description: `Opening ${hmiPath} in new window`,
+              });
+            }}
+          />
+        </div>
 
         {/* HMI Panel - Directory Control */}
         <HMIPanel

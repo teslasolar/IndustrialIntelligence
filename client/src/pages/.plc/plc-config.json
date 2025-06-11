@@ -5,16 +5,16 @@
   "scanRate": 100,
   "model": "CompactLogix 5370",
   "firmware": "v32.011",
-  "deployedAt": "2025-06-11T14:48:01.180Z",
+  "deployedAt": "2025-06-11T14:59:55.079Z",
   "status": "Running",
   "tags": {
     "system": {
       "fileCount": 2,
       "directorySize": "0.0",
-      "lastModified": "2025-06-11T02:06:56.880Z",
+      "lastModified": "2025-06-11T14:59:42.726Z",
       "processingLoad": "5.0",
-      "status": "Running"
+      "status": "Active"
     }
   },
-  "lastUpdate": "2025-06-11T14:57:43.195Z"
+  "lastUpdate": "2025-06-11T14:59:59.577Z"
 }
