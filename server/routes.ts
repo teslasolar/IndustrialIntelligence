@@ -300,24 +300,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // HMI Interface Routes
-  app.get('/hmi/:area(*)', async (req, res) => {
+  // HMI PLC Configuration Route - Must come before general HMI route
+  app.get('/hmi/:area(*)/plc-config.json', async (req, res) => {
     try {
       const areaPath = req.params.area;
-      const hmiPath = path.join(process.cwd(), areaPath, '.hmi', 'index.html');
+      const plcPath = path.join(process.cwd(), areaPath, '.plc', 'plc-config.json');
       
-      if (fs.existsSync(hmiPath)) {
-        res.sendFile(hmiPath);
+      if (fs.existsSync(plcPath)) {
+        res.setHeader('Content-Type', 'application/json');
+        res.sendFile(plcPath);
       } else {
-        res.status(404).send('HMI interface not found');
+        res.status(404).json({ error: 'PLC configuration not found' });
       }
     } catch (error) {
-      console.error('Error serving HMI:', error);
-      res.status(500).send('Error loading HMI interface');
+      console.error('Error serving PLC config:', error);
+      res.status(500).json({ error: 'Error loading PLC configuration' });
     }
   });
 
-  // HMI Assets (Perspective JSON and PLC data)
+  // HMI Perspective JSON Route
   app.get('/hmi/:area(*)/perspective-view.json', async (req, res) => {
     try {
       const areaPath = req.params.area;
@@ -334,19 +335,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/hmi/:area(*)/plc-config.json', async (req, res) => {
+  // HMI Interface Routes - Must come last
+  app.get('/hmi/:area(*)', async (req, res) => {
     try {
       const areaPath = req.params.area;
-      const plcPath = path.join(process.cwd(), areaPath, '.plc', 'plc-config.json');
+      const hmiPath = path.join(process.cwd(), areaPath, '.hmi', 'index.html');
       
-      if (fs.existsSync(plcPath)) {
-        res.sendFile(plcPath);
+      if (fs.existsSync(hmiPath)) {
+        res.sendFile(hmiPath);
       } else {
-        res.status(404).json({ error: 'PLC configuration not found' });
+        res.status(404).send('HMI interface not found');
       }
     } catch (error) {
-      console.error('Error serving PLC config:', error);
-      res.status(500).json({ error: 'Error loading PLC configuration' });
+      console.error('Error serving HMI:', error);
+      res.status(500).send('Error loading HMI interface');
     }
   });
 

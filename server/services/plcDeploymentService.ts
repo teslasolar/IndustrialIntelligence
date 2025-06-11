@@ -523,7 +523,7 @@ export class PLCDeploymentService {
         // Load PLC configuration and update display
         async function loadPLCData() {
             try {
-                const response = await fetch('../.plc/plc-config.json');
+                const response = await fetch('./plc-config.json');
                 const plcData = await response.json();
                 
                 // Update gauge
