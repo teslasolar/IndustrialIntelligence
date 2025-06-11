@@ -16,6 +16,7 @@ export class UnsTagService {
     this.initializeUnsStructure();
     this.deployPhysicalPLCs();
     this.startRepositoryMonitoring();
+    this.initializeMqttGateway();
   }
 
   private async deployPhysicalPLCs() {
@@ -642,6 +643,7 @@ export class UnsTagService {
       try {
         const repoStats = await this.repositoryScanner.scanAllRepositoryAreas();
         this.updatePLCsWithRealData(repoStats);
+        this.publishPLCTelemetryToMQTT(repoStats);
       } catch (error) {
         console.error('Error updating PLC data with repository stats:', error);
       }
@@ -711,5 +713,132 @@ export class UnsTagService {
         }
       }
     });
+  }
+
+  private async initializeMqttGateway() {
+    try {
+      console.log('Virtual Ignition Gateway: Initializing MQTT communication...');
+      
+      // Connect to MQTT broker (simulated for development)
+      await mqttService.connect();
+      
+      // Set up PLC telemetry listeners
+      mqttService.on('plc_telemetry', (data) => {
+        console.log(`MQTT: Received telemetry from PLC ${data.plcId}`);
+        this.processPLCTelemetry(data.plcId, data.data);
+      });
+
+      // Set up PLC status listeners
+      mqttService.on('plc_status', (data) => {
+        console.log(`MQTT: PLC ${data.plcId} status update: ${data.status.status}`);
+        this.updatePLCStatusFromMQTT(data.plcId, data.status);
+      });
+
+      // Set up alarm listeners
+      mqttService.on('alarm', (data) => {
+        console.log(`MQTT: Alarm from PLC ${data.plcId}`);
+        this.processAlarmFromPLC(data.plcId, data.alarm);
+      });
+
+      console.log('Virtual Ignition Gateway: MQTT communication initialized successfully');
+    } catch (error) {
+      console.error('Virtual Ignition Gateway: MQTT connection failed, continuing with WebSocket-only mode');
+      // System will function with WebSocket communication to HMI interfaces
+    }
+  }
+
+  private publishPLCTelemetryToMQTT(repoStats: DirectoryStats[]) {
+    if (!mqttService.isConnectedToBroker()) return;
+
+    const repoAreas = [
+      { name: "Client", path: "client" },
+      { name: "Server", path: "server" },
+      { name: "Shared", path: "shared" },
+      { name: "Components", path: "client/src/components" },
+      { name: "Services", path: "server/services" }
+    ];
+
+    repoAreas.forEach((area, index) => {
+      const stats = repoStats.find(s => s.path === area.path);
+      if (stats) {
+        const plcId = `PLC_${area.name.toUpperCase()}`;
+        const telemetry: PLCTelemetry = {
+          plcId,
+          areaName: area.name,
+          controlPath: area.path,
+          fileCount: stats.fileCount,
+          directorySize: stats.totalSize,
+          processingLoad: Math.min(95, (stats.fileCount * 1.5) + Math.random() * 10),
+          status: this.determinePLCStatus(stats),
+          lastModified: stats.lastModified.toISOString(),
+          timestamp: new Date().toISOString()
+        };
+
+        mqttService.publishPLCTelemetry(plcId, telemetry);
+      }
+    });
+  }
+
+  private determinePLCStatus(stats: DirectoryStats): 'Running' | 'Active' | 'Warning' | 'Error' | 'Offline' {
+    const isRecent = (Date.now() - stats.lastModified.getTime()) < 300000; // 5 minutes
+    if (stats.fileCount > 100) return 'Warning';
+    if (stats.fileCount > 50 && isRecent) return 'Active';
+    if (stats.fileCount > 0) return 'Running';
+    return 'Offline';
+  }
+
+  private processPLCTelemetry(plcId: string, telemetry: PLCTelemetry) {
+    // Update UNS tags with authentic telemetry data from PLCs
+    const basePath = `Enterprise/Site1/${telemetry.areaName}Area/${plcId}`;
+    
+    this.updateTagValue(`${basePath}/System/FileCount`, telemetry.fileCount.toString());
+    this.updateTagValue(`${basePath}/System/DirectorySize`, (telemetry.directorySize / (1024 * 1024)).toFixed(1));
+    this.updateTagValue(`${basePath}/System/ProcessingLoad`, telemetry.processingLoad.toString());
+    this.updateTagValue(`${basePath}/System/Status`, telemetry.status);
+    this.updateTagValue(`${basePath}/System/LastModified`, telemetry.lastModified);
+  }
+
+  private updatePLCStatusFromMQTT(plcId: string, status: any) {
+    // Find matching PLC node and update status
+    for (const [tagPath, tag] of this.tags.entries()) {
+      if (tagPath.includes(plcId) && tagPath.includes('/System/Status')) {
+        this.updateTagValue(tagPath, status.status);
+        break;
+      }
+    }
+  }
+
+  private processAlarmFromPLC(plcId: string, alarm: any) {
+    const alarmPath = `Enterprise/Site1/Industrial/${plcId}/Alarms/${alarm.alarmId || Date.now()}`;
+    
+    this.alarms.set(alarmPath, {
+      id: this.currentId++,
+      tagPath: `Enterprise/Site1/Industrial/${plcId}`,
+      alarmPath,
+      alarmType: alarm.type || 'Process',
+      condition: alarm.condition || 'High',
+      priority: alarm.priority || 500,
+      isActive: true,
+      isAcknowledged: false,
+      message: alarm.message || `PLC ${plcId} Alarm`,
+      activeTime: new Date(),
+      ackTime: null,
+      clearedTime: null,
+      metadata: { source: 'MQTT', plcId, originalAlarm: alarm }
+    });
+  }
+
+  // SCADA Command Interface - allows HMI to send commands to PLCs
+  async sendSCADACommand(targetPLC: string, command: string, parameters?: any) {
+    if (mqttService.isConnectedToBroker()) {
+      mqttService.sendSCADACommand({
+        targetPLC,
+        command: command as any,
+        parameters
+      });
+      console.log(`SCADA Command sent to ${targetPLC}: ${command}`);
+    } else {
+      console.warn(`MQTT not available, cannot send command to ${targetPLC}`);
+    }
   }
 }

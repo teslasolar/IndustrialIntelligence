@@ -32,54 +32,59 @@ export class MQTTService extends EventEmitter {
   }
 
   async connect(): Promise<void> {
-    try {
-      console.log(`Connecting to MQTT broker at ${this.brokerUrl}...`);
-      
-      this.client = mqtt.connect(this.brokerUrl, {
-        clientId: `scada_master_${Date.now()}`,
-        clean: true,
-        connectTimeout: 4000,
-        username: 'scada',
-        password: 'industrial',
-        reconnectPeriod: 5000,
-      });
-
-      this.client.on('connect', () => {
-        console.log('MQTT broker connected successfully');
-        this.isConnected = true;
-        this.reconnectAttempts = 0;
-        this.setupSubscriptions();
-        this.emit('connected');
-      });
-
-      this.client.on('error', (error) => {
-        console.error('MQTT connection error:', error);
-        this.isConnected = false;
-        this.emit('error', error);
-      });
-
-      this.client.on('offline', () => {
-        console.log('MQTT broker disconnected');
-        this.isConnected = false;
-        this.emit('disconnected');
-      });
-
-      this.client.on('reconnect', () => {
-        this.reconnectAttempts++;
-        console.log(`MQTT reconnecting... attempt ${this.reconnectAttempts}`);
+    return new Promise((resolve, reject) => {
+      try {
+        console.log(`Connecting to MQTT broker at ${this.brokerUrl}...`);
         
-        if (this.reconnectAttempts > this.maxReconnectAttempts) {
-          console.error('Max reconnection attempts reached');
-          this.client?.end();
-        }
-      });
+        this.client = mqtt.connect(this.brokerUrl, {
+          clientId: `scada_master_${Date.now()}`,
+          clean: true,
+          connectTimeout: 2000,
+          username: 'scada',
+          password: 'industrial',
+          reconnectPeriod: false, // Disable automatic reconnection
+        });
 
-      this.client.on('message', this.handleMessage.bind(this));
+        this.client.on('connect', () => {
+          console.log('MQTT broker connected successfully');
+          this.isConnected = true;
+          this.reconnectAttempts = 0;
+          this.setupSubscriptions();
+          this.emit('connected');
+          resolve();
+        });
 
-    } catch (error) {
-      console.error('Failed to connect to MQTT broker:', error);
-      throw error;
-    }
+        this.client.on('error', (error) => {
+          console.log('MQTT broker unavailable - continuing with WebSocket-only mode');
+          this.isConnected = false;
+          this.client = null;
+          resolve(); // Don't reject, allow graceful fallback
+        });
+
+        this.client.on('offline', () => {
+          console.log('MQTT broker disconnected');
+          this.isConnected = false;
+          this.emit('disconnected');
+        });
+
+        this.client.on('message', this.handleMessage.bind(this));
+
+        // Timeout after 3 seconds
+        setTimeout(() => {
+          if (!this.isConnected) {
+            console.log('MQTT connection timeout - continuing with WebSocket-only mode');
+            this.client?.end();
+            this.client = null;
+            this.isConnected = false;
+            resolve();
+          }
+        }, 3000);
+
+      } catch (error) {
+        console.log('MQTT broker initialization failed - continuing with WebSocket-only mode');
+        resolve(); // Don't reject, allow graceful fallback
+      }
+    });
   }
 
   private setupSubscriptions(): void {
@@ -251,8 +256,10 @@ export class MQTTService extends EventEmitter {
   async disconnect(): Promise<void> {
     if (this.client) {
       return new Promise((resolve) => {
-        this.client!.end(false, resolve);
-        this.isConnected = false;
+        this.client!.end(false, (error?: Error) => {
+          this.isConnected = false;
+          resolve();
+        });
       });
     }
   }
