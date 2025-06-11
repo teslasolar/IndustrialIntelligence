@@ -12,9 +12,9 @@
         }
 
         body {
-            font-family: 'Courier New', monospace;
-            background: #1a1a1a;
-            color: #00ff41;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
             overflow: hidden;
         }
 
@@ -22,42 +22,46 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            border: 2px solid #00ff41;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
         }
 
         .hmi-header {
-            background: linear-gradient(90deg, #003300, #004400);
-            padding: 10px 20px;
-            border-bottom: 1px solid #00ff41;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(74, 144, 226, 0.3);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-top: 3px solid #4a90e2;
         }
 
         .hmi-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            text-shadow: 0 0 5px #00ff41;
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .status-indicator {
             display: flex;
-            gap: 15px;
+            gap: 20px;
             align-items: center;
         }
 
         .status-light {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: #00ff41;
-            box-shadow: 0 0 10px #00ff41;
+            background: #4a90e2;
+            box-shadow: 0 0 10px #4a90e2;
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+            50% { opacity: 0.6; }
         }
 
         .hmi-content {
@@ -65,55 +69,75 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
-            gap: 2px;
-            background: #003300;
+            gap: 1px;
+            background: rgba(74, 144, 226, 0.1);
+            padding: 20px;
         }
 
         .control-panel {
-            background: #002200;
-            border: 1px solid #00ff41;
-            padding: 20px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            border-radius: 12px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
         }
 
         .panel-title {
-            font-size: 1em;
-            margin-bottom: 15px;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
             text-align: center;
-            color: #66ff66;
-            text-transform: uppercase;
-            border-bottom: 1px solid #00ff41;
-            padding-bottom: 5px;
+            color: #ffffff;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(74, 144, 226, 0.2);
+            padding-bottom: 8px;
         }
 
         .metrics-display {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 12px;
+            margin-bottom: 20px;
         }
 
         .metric {
-            background: #001100;
-            border: 1px solid #004400;
-            padding: 8px;
+            background: rgba(74, 144, 226, 0.1);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            padding: 12px;
             text-align: center;
-            border-radius: 3px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .metric:hover {
+            border-color: rgba(74, 144, 226, 0.4);
+            background: rgba(74, 144, 226, 0.15);
         }
 
         .metric-label {
-            font-size: 0.7em;
-            color: #88cc88;
+            font-size: 0.8rem;
+            color: #8892b0;
             display: block;
+            margin-bottom: 4px;
         }
 
         .metric-value {
-            font-size: 1.2em;
-            color: #00ff41;
-            font-weight: bold;
+            font-size: 1.4rem;
+            color: #4a90e2;
+            font-weight: 700;
             display: block;
-            text-shadow: 0 0 3px #00ff41;
         }
 
         .plc-list {
@@ -122,88 +146,107 @@
         }
 
         .plc-item {
-            background: #001a00;
-            border: 1px solid #004400;
-            margin: 5px 0;
-            padding: 8px;
-            border-radius: 3px;
+            background: rgba(74, 144, 226, 0.05);
+            border: 1px solid rgba(74, 144, 226, 0.15);
+            margin: 8px 0;
+            padding: 12px;
+            border-radius: 6px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .plc-item:hover {
+            background: rgba(74, 144, 226, 0.1);
+            border-color: rgba(74, 144, 226, 0.3);
         }
 
         .plc-name {
-            font-size: 0.9em;
-            color: #66ff66;
+            font-size: 0.95rem;
+            color: #b8c5d6;
+            font-weight: 500;
         }
 
         .plc-status {
-            font-size: 0.8em;
-            padding: 2px 6px;
-            border-radius: 2px;
-            background: #004400;
-            color: #00ff41;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 4px;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: #ffffff;
+            font-weight: 600;
         }
 
         .alarm-panel {
-            color: #ffaa00;
+            color: #ffa726;
         }
 
         .alarm-item {
-            background: #2a1a00;
-            border: 1px solid #ffaa00;
-            margin: 3px 0;
-            padding: 6px;
-            font-size: 0.8em;
-            border-radius: 2px;
+            background: rgba(255, 167, 38, 0.1);
+            border: 1px solid rgba(255, 167, 38, 0.3);
+            margin: 6px 0;
+            padding: 10px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            color: #ffa726;
         }
 
         .control-buttons {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-top: 16px;
         }
 
         .hmi-button {
-            background: #003300;
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            padding: 8px;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            border: none;
+            color: #ffffff;
+            padding: 12px 16px;
             cursor: pointer;
-            border-radius: 3px;
+            border-radius: 6px;
             font-family: inherit;
-            font-size: 0.8em;
-            transition: all 0.2s;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
         .hmi-button:hover {
-            background: #004400;
-            box-shadow: 0 0 5px #00ff41;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(74, 144, 226, 0.3);
         }
 
         .emergency-stop {
-            background: #440000 !important;
-            border-color: #ff4444 !important;
-            color: #ff4444 !important;
-            font-weight: bold;
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+        }
+
+        .emergency-stop:hover {
+            box-shadow: 0 8px 16px rgba(220, 53, 69, 0.3) !important;
         }
 
         .time-display {
-            font-size: 0.9em;
-            color: #88cc88;
+            font-size: 0.9rem;
+            color: #8892b0;
+            font-weight: 500;
+        }
+
+        .status-text {
+            color: #b8c5d6;
+            font-size: 0.9rem;
+            font-weight: 500;
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="hmi-container">
         <div class="hmi-header">
-            <div class="hmi-title">ROOT ENTERPRISE HMI - FILE MANAGEMENT SYSTEM</div>
+            <div class="hmi-title">COMPANY A - ROOT ENTERPRISE HMI</div>
             <div class="status-indicator">
                 <div class="status-light"></div>
-                <span>SCADA ONLINE</span>
+                <span class="status-text">SCADA ONLINE</span>
                 <div class="status-light"></div>
-                <span>10 PLCs ACTIVE</span>
+                <span class="status-text">10 PLCs ACTIVE</span>
                 <div class="time-display" id="currentTime"></div>
             </div>
         </div>
@@ -317,6 +360,34 @@
     </div>
 
     <script>
+        // Add back button to header
+        document.addEventListener('DOMContentLoaded', function() {
+            const header = document.querySelector('.hmi-header');
+            const backButton = document.createElement('button');
+            backButton.innerHTML = '← Back to Main';
+            backButton.className = 'hmi-button';
+            backButton.style.position = 'absolute';
+            backButton.style.left = '24px';
+            backButton.style.top = '50%';
+            backButton.style.transform = 'translateY(-50%)';
+            backButton.style.fontSize = '0.8rem';
+            backButton.style.padding = '8px 16px';
+            backButton.onclick = function() {
+                window.location.href = '../index.html';
+            };
+            header.style.position = 'relative';
+            header.appendChild(backButton);
+
+            // Animate status lights with blue glow
+            setInterval(function() {
+                const lights = document.querySelectorAll('.status-light');
+                lights.forEach(light => {
+                    const intensity = Math.random() * 15 + 5;
+                    light.style.boxShadow = `0 0 ${intensity}px #4a90e2`;
+                });
+            }, 2000);
+        });
+
         // Simulate real-time HMI updates
         function updateTime() {
             const now = new Date();
