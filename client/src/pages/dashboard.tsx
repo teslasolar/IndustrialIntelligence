@@ -6,6 +6,7 @@ import { PLCController } from '../components/PLC-Controller';
 import { SCADAMonitor } from '../components/SCADA-Monitor';
 import { UnsTagBrowser } from '../components/UNS-TagBrowser';
 import { HMIViewer } from '../components/HMI-Viewer';
+import { FileSystemBrowser } from '../components/FileSystemBrowser';
 import { useFileSystem } from '../hooks/useFileSystem';
 import { useToast } from '@/hooks/use-toast';
 
@@ -253,15 +254,19 @@ export default function Dashboard() {
               />
             </div>
           ) : (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center">
-                <Monitor size={48} className="text-gray-600 mx-auto mb-4" />
-                <h3 className="font-mono font-bold text-gray-400 mb-2">
-                  NO HMI SELECTED
-                </h3>
-                <p className="text-sm text-gray-500 font-mono">
-                  Select an HMI interface from the left panel to view industrial control interfaces
-                </p>
+            <div className="h-full p-4 overflow-y-auto">
+              <div className="space-y-6">
+                <div className="text-center mb-6">
+                  <Monitor size={48} className="text-gray-600 mx-auto mb-4" />
+                  <h3 className="font-mono font-bold text-gray-400 mb-2">
+                    INDUSTRIAL FILE MANAGEMENT SYSTEM
+                  </h3>
+                  <p className="text-sm text-gray-500 font-mono">
+                    Authentic file system operations with PLC-SCADA integration
+                  </p>
+                </div>
+                
+                <FileSystemBrowser />
               </div>
             </div>
           )}
