@@ -30,6 +30,7 @@ export default function Dashboard() {
   } = useFileSystem();
 
   const [currentUser] = useState('OPERATOR_01');
+  const [selectedHMI, setSelectedHMI] = useState<string | null>(null);
   const activeAlarms = alarms.filter(alarm => !alarm.acknowledged);
   
   const systemStatus = {
@@ -201,9 +202,10 @@ export default function Dashboard() {
         <div className="w-80 border-r border-gray-600">
           <HMIViewer
             onViewHMI={(hmiPath) => {
+              setSelectedHMI(hmiPath);
               toast({
-                title: "HMI Interface Opened",
-                description: `Opening ${hmiPath} in new window`,
+                title: "HMI Interface Selected",
+                description: `Loading ${hmiPath} interface`,
               });
             }}
           />

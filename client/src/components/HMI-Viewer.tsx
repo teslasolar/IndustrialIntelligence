@@ -7,16 +7,16 @@ interface HMIViewerProps {
 }
 
 const HMI_INTERFACES = [
-  { name: 'Client Area', path: '/client/.hmi/', plc: 'PLC1', description: 'Frontend application control' },
-  { name: 'Server Area', path: '/server/.hmi/', plc: 'PLC2', description: 'Backend services control' },
-  { name: 'Shared Area', path: '/shared/.hmi/', plc: 'PLC3', description: 'Schema and shared resources' },
-  { name: 'Components', path: '/client/src/components/.hmi/', plc: 'PLC4', description: 'React components control' },
-  { name: 'Services', path: '/server/services/.hmi/', plc: 'PLC5', description: 'Business logic services' },
-  { name: 'Types', path: '/client/src/types/.hmi/', plc: 'PLC6', description: 'TypeScript definitions' },
-  { name: 'Hooks', path: '/client/src/hooks/.hmi/', plc: 'PLC7', description: 'React hooks control' },
-  { name: 'Pages', path: '/client/src/pages/.hmi/', plc: 'PLC8', description: 'Application pages' },
-  { name: 'Assets', path: '/attached_assets/.hmi/', plc: 'PLC9', description: 'Asset management' },
-  { name: 'Workspace', path: '/workspace/.hmi/', plc: 'PLC10', description: 'Development workspace' }
+  { name: 'Client Area', path: '/hmi/client', plc: 'PLC1', description: 'Frontend application control' },
+  { name: 'Server Area', path: '/hmi/server', plc: 'PLC2', description: 'Backend services control' },
+  { name: 'Shared Area', path: '/hmi/shared', plc: 'PLC3', description: 'Schema and shared resources' },
+  { name: 'Components', path: '/hmi/client/src/components', plc: 'PLC4', description: 'React components control' },
+  { name: 'Services', path: '/hmi/server/services', plc: 'PLC5', description: 'Business logic services' },
+  { name: 'Types', path: '/hmi/client/src/types', plc: 'PLC6', description: 'TypeScript definitions' },
+  { name: 'Hooks', path: '/hmi/client/src/hooks', plc: 'PLC7', description: 'React hooks control' },
+  { name: 'Pages', path: '/hmi/client/src/pages', plc: 'PLC8', description: 'Application pages' },
+  { name: 'Assets', path: '/hmi/attached_assets', plc: 'PLC9', description: 'Asset management' },
+  { name: 'Workspace', path: '/hmi/workspace', plc: 'PLC10', description: 'Development workspace' }
 ];
 
 export function HMIViewer({ onViewHMI }: HMIViewerProps) {
@@ -25,8 +25,6 @@ export function HMIViewer({ onViewHMI }: HMIViewerProps) {
 
   const handleViewHMI = (hmiPath: string) => {
     setSelectedHMI(hmiPath);
-    // Open HMI in new window/tab since we're in Replit
-    window.open(hmiPath, '_blank', 'width=1200,height=800');
     onViewHMI?.(hmiPath);
   };
 

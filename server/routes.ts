@@ -1,5 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import * as path from "path";
+import * as fs from "fs";
 import { storage } from "./storage";
 import { WebSocketService } from "./services/websocketService";
 import { 
@@ -295,6 +297,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(metrics);
     } catch (error: any) {
       res.status(500).json({ message: "Failed to fetch metrics", error: error.message });
+    }
+  });
+
+  // HMI Interface Routes
+  app.get('/hmi/:area(*)', async (req, res) => {
+    try {
+      const areaPath = req.params.area;
+      const hmiPath = path.join(process.cwd(), areaPath, '.hmi', 'index.html');
+      
+      if (fs.existsSync(hmiPath)) {
+        res.sendFile(hmiPath);
+      } else {
+        res.status(404).send('HMI interface not found');
+      }
+    } catch (error) {
+      console.error('Error serving HMI:', error);
+      res.status(500).send('Error loading HMI interface');
+    }
+  });
+
+  // HMI Assets (Perspective JSON and PLC data)
+  app.get('/hmi/:area(*)/perspective-view.json', async (req, res) => {
+    try {
+      const areaPath = req.params.area;
+      const jsonPath = path.join(process.cwd(), areaPath, '.hmi', 'perspective-view.json');
+      
+      if (fs.existsSync(jsonPath)) {
+        res.sendFile(jsonPath);
+      } else {
+        res.status(404).json({ error: 'Perspective view not found' });
+      }
+    } catch (error) {
+      console.error('Error serving perspective view:', error);
+      res.status(500).json({ error: 'Error loading perspective view' });
+    }
+  });
+
+  app.get('/hmi/:area(*)/plc-config.json', async (req, res) => {
+    try {
+      const areaPath = req.params.area;
+      const plcPath = path.join(process.cwd(), areaPath, '.plc', 'plc-config.json');
+      
+      if (fs.existsSync(plcPath)) {
+        res.sendFile(plcPath);
+      } else {
+        res.status(404).json({ error: 'PLC configuration not found' });
+      }
+    } catch (error) {
+      console.error('Error serving PLC config:', error);
+      res.status(500).json({ error: 'Error loading PLC configuration' });
     }
   });
 
