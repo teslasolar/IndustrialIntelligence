@@ -39,31 +39,60 @@ export class UnsTagService {
     };
     this.nodes.set(siteNode.nodeId, siteNode);
 
-    const areaNode: UnsNode = {
-      id: this.currentId++,
-      nodeId: "Enterprise/Site1/FileSystemArea",
-      parentNodeId: "Enterprise/Site1",
-      name: "FileSystemArea",
-      nodeType: "Area",
-      description: "File system management area",
-      metadata: {},
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.nodes.set(areaNode.nodeId, areaNode);
+    // Repository directory areas with dedicated PLCs
+    const repoAreas = [
+      { name: "Client", path: "client", description: "Frontend application area" },
+      { name: "Server", path: "server", description: "Backend services area" },
+      { name: "Shared", path: "shared", description: "Common schemas and types" },
+      { name: "Components", path: "client/src/components", description: "UI components library" },
+      { name: "Services", path: "server/services", description: "Backend service modules" },
+      { name: "Types", path: "client/src/types", description: "TypeScript definitions" },
+      { name: "Hooks", path: "client/src/hooks", description: "React custom hooks" },
+      { name: "Pages", path: "client/src/pages", description: "Application pages" },
+      { name: "Assets", path: "attached_assets", description: "Static assets and resources" },
+      { name: "Workspace", path: "workspace", description: "Working directory" }
+    ];
 
-    const plcNode: UnsNode = {
-      id: this.currentId++,
-      nodeId: "Enterprise/Site1/FileSystemArea/PLC1",
-      parentNodeId: "Enterprise/Site1/FileSystemArea",
-      name: "PLC1",
-      nodeType: "Device",
-      description: "Primary file system controller",
-      metadata: { type: "Ignition Gateway", version: "8.1.25" },
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    this.nodes.set(plcNode.nodeId, plcNode);
+    repoAreas.forEach((area, index) => {
+      // Create area node
+      const areaNode: UnsNode = {
+        id: this.currentId++,
+        nodeId: `Enterprise/Site1/${area.name}Area`,
+        parentNodeId: "Enterprise/Site1",
+        name: `${area.name}Area`,
+        nodeType: "Area",
+        description: area.description,
+        metadata: { 
+          repositoryPath: area.path,
+          monitoring: true,
+          lastScan: new Date().toISOString()
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.nodes.set(areaNode.nodeId, areaNode);
+
+      // Create dedicated PLC for each area
+      const plcNode: UnsNode = {
+        id: this.currentId++,
+        nodeId: `Enterprise/Site1/${area.name}Area/PLC${index + 1}`,
+        parentNodeId: `Enterprise/Site1/${area.name}Area`,
+        name: `PLC${index + 1}`,
+        nodeType: "Device",
+        description: `${area.name} directory controller`,
+        metadata: { 
+          type: "Ignition PLC",
+          model: "CompactLogix 5370",
+          firmware: "v32.011",
+          controlsPath: area.path,
+          scanRate: "100ms",
+          status: "Running"
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      this.nodes.set(plcNode.nodeId, plcNode);
+    });
 
     // Initialize UNS tags
     this.initializeSystemTags();
@@ -73,17 +102,34 @@ export class UnsTagService {
   }
 
   private initializeSystemTags() {
-    const systemTags = [
-      {
-        tagPath: "Enterprise/Site1/FileSystemArea/PLC1/System/Status",
-        nodeId: "Enterprise/Site1/FileSystemArea/PLC1",
-        tagName: "Status",
-        dataType: "String",
-        value: "Running",
-        quality: "Good",
-        historize: true,
-        metadata: { description: "System operational status" }
-      },
+    // Create system tags for each distributed PLC
+    const repoAreas = [
+      { name: "Client", path: "client" },
+      { name: "Server", path: "server" },
+      { name: "Shared", path: "shared" },
+      { name: "Components", path: "client/src/components" },
+      { name: "Services", path: "server/services" },
+      { name: "Types", path: "client/src/types" },
+      { name: "Hooks", path: "client/src/hooks" },
+      { name: "Pages", path: "client/src/pages" },
+      { name: "Assets", path: "attached_assets" },
+      { name: "Workspace", path: "workspace" }
+    ];
+
+    repoAreas.forEach((area, index) => {
+      const plcNodeId = `Enterprise/Site1/${area.name}Area/PLC${index + 1}`;
+      
+      const systemTags = [
+        {
+          tagPath: `${plcNodeId}/System/Status`,
+          nodeId: plcNodeId,
+          tagName: "Status",
+          dataType: "String",
+          value: "Running",
+          quality: "Good",
+          historize: true,
+          metadata: { description: `${area.name} PLC operational status`, controlsPath: area.path }
+        },
       {
         tagPath: "Enterprise/Site1/FileSystemArea/PLC1/System/CpuUsage",
         nodeId: "Enterprise/Site1/FileSystemArea/PLC1",
@@ -126,13 +172,14 @@ export class UnsTagService {
       }
     ];
 
-    systemTags.forEach(tag => {
-      const unsTag: UnsTag = {
-        id: this.currentId++,
-        ...tag,
-        timestamp: new Date(),
-      };
-      this.tags.set(tag.tagPath, unsTag);
+      systemTags.forEach(tag => {
+        const unsTag: UnsTag = {
+          id: this.currentId++,
+          ...tag,
+          timestamp: new Date(),
+        };
+        this.tags.set(tag.tagPath, unsTag);
+      });
     });
   }
 
