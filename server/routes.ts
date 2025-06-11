@@ -4,6 +4,7 @@ import * as path from "path";
 import * as fs from "fs";
 import { storage } from "./storage";
 import { WebSocketService } from "./services/websocketService";
+import { filePathService } from "./services/filePathService";
 import { 
   insertUnsNodeSchema, 
   insertUnsTagSchema, 
@@ -221,6 +222,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(config);
     } catch (error: any) {
       res.status(400).json({ message: "Failed to set configuration", error: error.message });
+    }
+  });
+
+  // Local File Path API - Authentic file system operations at lowest level
+  app.get("/api/filesystem/scan/:path(*)?", async (req, res) => {
+    try {
+      const requestedPath = req.params.path || '.';
+      const structure = await filePathService.scanPath(requestedPath);
+      res.json(structure);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to scan path", error: error.message });
+    }
+  });
+
+  app.get("/api/filesystem/file/:path(*)", async (req, res) => {
+    try {
+      const filePath = req.params.path;
+      const content = await filePathService.getFileContent(filePath);
+      res.json({ path: filePath, content });
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to read file", error: error.message });
+    }
+  });
+
+  app.post("/api/filesystem/directory", async (req, res) => {
+    try {
+      const { path: dirPath } = req.body;
+      const success = await filePathService.createDirectory(dirPath);
+      if (success) {
+        res.json({ message: "Directory created successfully", path: dirPath });
+      } else {
+        res.status(500).json({ message: "Failed to create directory" });
+      }
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to create directory", error: error.message });
+    }
+  });
+
+  app.post("/api/filesystem/file", async (req, res) => {
+    try {
+      const { path: filePath, content } = req.body;
+      const success = await filePathService.writeFile(filePath, content);
+      if (success) {
+        res.json({ message: "File written successfully", path: filePath });
+      } else {
+        res.status(500).json({ message: "Failed to write file" });
+      }
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to write file", error: error.message });
+    }
+  });
+
+  app.delete("/api/filesystem/:path(*)", async (req, res) => {
+    try {
+      const filePath = req.params.path;
+      const success = await filePathService.deleteFile(filePath);
+      if (success) {
+        res.json({ message: "File/directory deleted successfully", path: filePath });
+      } else {
+        res.status(500).json({ message: "Failed to delete file/directory" });
+      }
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to delete file/directory", error: error.message });
+    }
+  });
+
+  app.post("/api/filesystem/copy", async (req, res) => {
+    try {
+      const { sourcePath, destinationPath } = req.body;
+      const success = await filePathService.copyFile(sourcePath, destinationPath);
+      if (success) {
+        res.json({ message: "File copied successfully", sourcePath, destinationPath });
+      } else {
+        res.status(500).json({ message: "Failed to copy file" });
+      }
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to copy file", error: error.message });
+    }
+  });
+
+  app.get("/api/filesystem/stats/:path(*)", async (req, res) => {
+    try {
+      const filePath = req.params.path;
+      const stats = await filePathService.getPathStats(filePath);
+      if (stats) {
+        res.json(stats);
+      } else {
+        res.status(404).json({ message: "Path not found" });
+      }
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to get path stats", error: error.message });
+    }
+  });
+
+  app.get("/api/filesystem/search", async (req, res) => {
+    try {
+      const { pattern, path: searchPath = '.' } = req.query;
+      if (!pattern) {
+        return res.status(400).json({ message: "Search pattern is required" });
+      }
+      const results = await filePathService.searchFiles(pattern as string, searchPath as string);
+      res.json(results);
+    } catch (error: any) {
+      res.status(400).json({ message: "Failed to search files", error: error.message });
     }
   });
 
