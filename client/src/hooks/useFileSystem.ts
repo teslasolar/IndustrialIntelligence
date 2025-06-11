@@ -32,12 +32,22 @@ export function useFileSystem() {
   const { data: alarms = [], isLoading: alarmsLoading } = useQuery<SystemAlarm[]>({
     queryKey: ['/api/alarms'],
     refetchInterval: 5000, // Refetch every 5 seconds
+    select: (data: any[]) => data.map(alarm => ({
+      ...alarm,
+      createdAt: alarm.createdAt ? new Date(alarm.createdAt) : new Date()
+    }))
   });
 
   // Fetch metrics
   const { data: metrics, isLoading: metricsLoading } = useQuery<SystemMetrics>({
     queryKey: ['/api/metrics'],
-    select: (data: SystemMetrics | SystemMetrics[]) => Array.isArray(data) ? data[0] : data,
+    select: (data: any) => {
+      const metricsData = Array.isArray(data) ? data[0] : data;
+      return {
+        ...metricsData,
+        timestamp: metricsData.timestamp ? new Date(metricsData.timestamp) : new Date()
+      };
+    },
   });
 
   // Create directory mutation

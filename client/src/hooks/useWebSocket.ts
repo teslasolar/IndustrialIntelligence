@@ -32,6 +32,38 @@ export function useWebSocket(url: string) {
     ws.onmessage = (event) => {
       try {
         const message: WebSocketMessage = JSON.parse(event.data);
+        
+        // Handle date serialization for alarm and metrics data
+        if (message.type === 'METRICS_UPDATE' && message.data) {
+          message.data = {
+            ...message.data,
+            timestamp: message.data.timestamp ? new Date(message.data.timestamp) : new Date()
+          };
+        }
+        
+        if (message.type === 'ALARM_ACKNOWLEDGED' && message.data) {
+          message.data = {
+            ...message.data,
+            createdAt: message.data.createdAt ? new Date(message.data.createdAt) : new Date()
+          };
+        }
+        
+        if (message.type === 'INITIAL_DATA' && message.data) {
+          // Fix dates in initial data
+          if (message.data.alarms) {
+            message.data.alarms = message.data.alarms.map((alarm: any) => ({
+              ...alarm,
+              createdAt: alarm.createdAt ? new Date(alarm.createdAt) : new Date()
+            }));
+          }
+          if (message.data.metrics) {
+            message.data.metrics = {
+              ...message.data.metrics,
+              timestamp: message.data.metrics.timestamp ? new Date(message.data.metrics.timestamp) : new Date()
+            };
+          }
+        }
+        
         setLastMessage(message);
         
         const handler = messageHandlers.current.get(message.type);

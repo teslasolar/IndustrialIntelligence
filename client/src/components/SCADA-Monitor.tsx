@@ -47,12 +47,21 @@ export function SCADAMonitor({
     }
   };
 
-  const formatTime = (date: Date): string => {
-    return new Intl.DateTimeFormat('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    }).format(new Date(date));
+  const formatTime = (date: Date | string | null): string => {
+    if (!date) return '--:--';
+    
+    try {
+      const dateObj = date instanceof Date ? date : new Date(date);
+      if (isNaN(dateObj.getTime())) return '--:--';
+      
+      return new Intl.DateTimeFormat('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      }).format(dateObj);
+    } catch (error) {
+      return '--:--';
+    }
   };
 
   const formatThroughput = (kbps: number): string => {
