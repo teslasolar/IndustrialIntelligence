@@ -1,0 +1,201 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(222, 84%, 4.9%);
+  --foreground: hsl(210, 40%, 98%);
+  --muted: hsl(217, 32.6%, 17.5%);
+  --muted-foreground: hsl(215, 20.2%, 65.1%);
+  --popover: hsl(222, 84%, 4.9%);
+  --popover-foreground: hsl(210, 40%, 98%);
+  --card: hsl(222, 84%, 4.9%);
+  --card-foreground: hsl(210, 40%, 98%);
+  --border: hsl(217, 32.6%, 17.5%);
+  --input: hsl(217, 32.6%, 17.5%);
+  --primary: hsl(210, 100%, 56%);
+  --primary-foreground: hsl(222, 47.4%, 11.2%);
+  --secondary: hsl(217, 32.6%, 17.5%);
+  --secondary-foreground: hsl(210, 40%, 98%);
+  --accent: hsl(217, 32.6%, 17.5%);
+  --accent-foreground: hsl(210, 40%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --ring: hsl(217, 32.6%, 17.5%);
+  --radius: 0.5rem;
+
+  /* Industrial colors */
+  --industrial-blue: hsl(210, 100%, 56%);
+  --industrial-green: hsl(142, 76%, 36%);
+  --industrial-amber: hsl(45, 93%, 47%);
+  --industrial-red: hsl(0, 84%, 60%);
+  --industrial-gray: hsl(215, 16%, 47%);
+  --industrial-dark: hsl(222, 84%, 4.9%);
+  --industrial-panel: hsl(217, 32.6%, 17.5%);
+  --industrial-light: hsl(210, 40%, 98%);
+}
+
+.dark {
+  --background: hsl(222, 84%, 4.9%);
+  --foreground: hsl(210, 40%, 98%);
+  --muted: hsl(217, 32.6%, 17.5%);
+  --muted-foreground: hsl(215, 20.2%, 65.1%);
+  --popover: hsl(222, 84%, 4.9%);
+  --popover-foreground: hsl(210, 40%, 98%);
+  --card: hsl(222, 84%, 4.9%);
+  --card-foreground: hsl(210, 40%, 98%);
+  --border: hsl(217, 32.6%, 17.5%);
+  --input: hsl(217, 32.6%, 17.5%);
+  --primary: hsl(210, 100%, 56%);
+  --primary-foreground: hsl(222, 47.4%, 11.2%);
+  --secondary: hsl(217, 32.6%, 17.5%);
+  --secondary-foreground: hsl(210, 40%, 98%);
+  --accent: hsl(217, 32.6%, 17.5%);
+  --accent-foreground: hsl(210, 40%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --ring: hsl(217, 32.6%, 17.5%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .industrial-panel {
+    background: linear-gradient(135deg, hsl(217, 32.6%, 17.5%) 0%, hsl(215, 16%, 25%) 100%);
+    border: 1px solid hsl(217, 32.6%, 25%);
+    box-shadow: inset 0 1px 0 hsla(210, 40%, 98%, 0.1), 0 4px 8px hsla(0, 0%, 0%, 0.3);
+  }
+
+  .industrial-button {
+    background: linear-gradient(135deg, hsl(215, 16%, 25%) 0%, hsl(217, 32.6%, 25%) 100%);
+    border: 1px solid hsl(217, 32.6%, 35%);
+    transition: all 0.2s ease;
+  }
+
+  .industrial-button:hover {
+    background: linear-gradient(135deg, hsl(217, 32.6%, 25%) 0%, hsl(217, 32.6%, 35%) 100%);
+    transform: translateY(-1px);
+  }
+
+  .industrial-button:active {
+    transform: translateY(0);
+    box-shadow: inset 0 2px 4px hsla(0, 0%, 0%, 0.3);
+  }
+
+  .status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    position: relative;
+  }
+
+  .status-indicator::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    border: 2px solid currentColor;
+    opacity: 0.3;
+    animation: pulse 2s infinite;
+  }
+
+  .alarm-priority-high {
+    animation: blink 0.5s infinite;
+  }
+}
+
+@layer components {
+  .text-industrial-blue {
+    color: var(--industrial-blue);
+  }
+  
+  .text-industrial-green {
+    color: var(--industrial-green);
+  }
+  
+  .text-industrial-amber {
+    color: var(--industrial-amber);
+  }
+  
+  .text-industrial-red {
+    color: var(--industrial-red);
+  }
+  
+  .text-industrial-gray {
+    color: var(--industrial-gray);
+  }
+  
+  .text-industrial-light {
+    color: var(--industrial-light);
+  }
+
+  .bg-industrial-blue {
+    background-color: var(--industrial-blue);
+  }
+  
+  .bg-industrial-green {
+    background-color: var(--industrial-green);
+  }
+  
+  .bg-industrial-amber {
+    background-color: var(--industrial-amber);
+  }
+  
+  .bg-industrial-red {
+    background-color: var(--industrial-red);
+  }
+  
+  .bg-industrial-dark {
+    background-color: var(--industrial-dark);
+  }
+  
+  .bg-industrial-panel {
+    background-color: var(--industrial-panel);
+  }
+
+  .border-industrial-blue {
+    border-color: var(--industrial-blue);
+  }
+  
+  .border-industrial-green {
+    border-color: var(--industrial-green);
+  }
+  
+  .border-industrial-amber {
+    border-color: var(--industrial-amber);
+  }
+  
+  .border-industrial-red {
+    border-color: var(--industrial-red);
+  }
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0.3; }
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-blink {
+  animation: blink 1s infinite;
+}
