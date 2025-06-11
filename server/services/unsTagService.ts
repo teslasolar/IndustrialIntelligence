@@ -1,6 +1,7 @@
 import { UnsNode, UnsTag, TagAlarm, PerspectiveView, InsertUnsNode, InsertUnsTag, InsertTagAlarm } from '@shared/schema';
 import { RepositoryScanner, DirectoryStats } from './repositoryScanner';
 import { PLCDeploymentService } from './plcDeploymentService';
+import { mqttService, PLCTelemetry } from './mqttService';
 
 export class UnsTagService {
   private nodes: Map<string, UnsNode> = new Map();
