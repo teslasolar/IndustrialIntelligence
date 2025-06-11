@@ -225,19 +225,47 @@ export default function Dashboard() {
           onRefreshView={handleRefreshView}
         />
 
-        {/* PLC Controller - Center Content */}
-        <PLCController
-          files={files}
-          operations={operations}
-          selectedFile={selectedFile}
-          onSelectFile={selectFile}
-          onCreateBackup={handleCreateBackup}
-          onValidatePermissions={handleValidatePermissions}
-          onScanErrors={handleScanErrors}
-          onOptimizeStorage={handleOptimizeStorage}
-          onResolveConflict={handleResolveConflict}
-          onViewHistory={handleViewHistory}
-        />
+        {/* Embedded HMI Interface - Center Content */}
+        <div className="flex-1 industrial-panel">
+          {selectedHMI ? (
+            <div className="h-full flex flex-col">
+              <div className="border-b border-gray-600 p-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-mono font-bold text-industrial-light">
+                    ACTIVE HMI INTERFACE
+                  </h3>
+                  <button
+                    onClick={() => setSelectedHMI(null)}
+                    className="industrial-button px-3 py-1 rounded text-xs hover:bg-gray-600"
+                  >
+                    CLOSE
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400 font-mono mt-1">
+                  {selectedHMI}
+                </p>
+              </div>
+              <iframe
+                src={selectedHMI}
+                className="flex-1 w-full border-0"
+                title="HMI Interface"
+                sandbox="allow-scripts allow-same-origin"
+              />
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center">
+                <Monitor size={48} className="text-gray-600 mx-auto mb-4" />
+                <h3 className="font-mono font-bold text-gray-400 mb-2">
+                  NO HMI SELECTED
+                </h3>
+                <p className="text-sm text-gray-500 font-mono">
+                  Select an HMI interface from the left panel to view industrial control interfaces
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* SCADA Monitor - Right Sidebar */}
         <SCADAMonitor
