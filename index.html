@@ -12,63 +12,122 @@
         }
         
         body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            color: #00ff41;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
             line-height: 1.6;
             min-height: 100vh;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(74, 144, 226, 0.1) 0%, transparent 70%);
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
         }
         
-        .header {
+        .hero-content {
             text-align: center;
-            padding: 40px 0;
-            border-bottom: 2px solid #00ff41;
-            margin-bottom: 40px;
+            margin-bottom: 80px;
         }
         
-        .header h1 {
-            font-size: 3em;
-            text-shadow: 0 0 10px #00ff41;
-            margin-bottom: 10px;
-        }
-        
-        .header .subtitle {
-            font-size: 1.2em;
-            color: #66ff66;
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 20px;
+        }
+        
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #b8c5d6 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.2;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: #8892b0;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .status-bar {
             display: flex;
             justify-content: center;
-            gap: 30px;
-            margin: 20px 0;
+            gap: 40px;
+            margin: 40px 0;
+            flex-wrap: wrap;
         }
         
         .status-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+            background: rgba(74, 144, 226, 0.1);
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 1px solid rgba(74, 144, 226, 0.2);
         }
         
         .status-light {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            background: #00ff41;
-            box-shadow: 0 0 10px #00ff41;
+            background: #4a90e2;
+            box-shadow: 0 0 10px #4a90e2;
             animation: pulse 2s infinite;
         }
         
         @keyframes pulse {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
+            50% { opacity: 0.6; }
+        }
+        
+        .section {
+            padding: 80px 0;
+        }
+        
+        .section-dark {
+            background: #0f0f0f;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 60px;
+            color: #ffffff;
         }
         
         .grid {
@@ -79,202 +138,283 @@
         }
         
         .card {
-            background: rgba(0, 255, 65, 0.1);
-            border: 1px solid #00ff41;
-            border-radius: 8px;
-            padding: 25px;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            border-radius: 16px;
+            padding: 32px;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
         }
         
         .card:hover {
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(74, 144, 226, 0.2);
+            border-color: rgba(74, 144, 226, 0.4);
+        }
+        
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            display: block;
         }
         
         .card h3 {
-            font-size: 1.4em;
-            margin-bottom: 15px;
-            color: #00ff41;
-            text-transform: uppercase;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+            color: #ffffff;
+            font-weight: 600;
         }
         
         .card p {
-            color: #cccccc;
-            margin-bottom: 15px;
+            color: #8892b0;
+            margin-bottom: 20px;
+            line-height: 1.6;
         }
         
         .card ul {
             list-style: none;
-            margin: 15px 0;
+            margin: 20px 0;
         }
         
         .card ul li {
-            color: #99ff99;
-            margin: 8px 0;
+            color: #b8c5d6;
+            margin: 12px 0;
             padding-left: 20px;
             position: relative;
+            font-size: 0.95rem;
         }
         
         .card ul li:before {
-            content: "▸";
+            content: "•";
             position: absolute;
             left: 0;
-            color: #00ff41;
+            color: #4a90e2;
+            font-weight: bold;
         }
         
-        .links {
+        .cta-section {
             text-align: center;
-            margin: 40px 0;
+            margin: 60px 0;
         }
         
         .btn {
             display: inline-block;
-            padding: 12px 24px;
+            padding: 16px 32px;
             margin: 10px;
-            background: rgba(0, 255, 65, 0.2);
-            border: 1px solid #00ff41;
-            color: #00ff41;
+            background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+            color: #ffffff;
             text-decoration: none;
-            border-radius: 4px;
+            border-radius: 8px;
             transition: all 0.3s ease;
-            text-transform: uppercase;
-            font-weight: bold;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
         }
         
         .btn:hover {
-            background: rgba(0, 255, 65, 0.3);
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(74, 144, 226, 0.3);
         }
         
-        .terminal {
-            background: #000;
-            border: 1px solid #00ff41;
-            border-radius: 8px;
-            padding: 20px;
-            margin: 30px 0;
-            font-family: 'Courier New', monospace;
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #4a90e2;
+            color: #4a90e2;
         }
         
-        .terminal-header {
-            color: #00ff41;
-            margin-bottom: 15px;
-            font-weight: bold;
+        .btn-outline:hover {
+            background: #4a90e2;
+            color: #ffffff;
         }
         
-        .terminal-content {
-            color: #66ff66;
+        .architecture-section {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 16px;
+            padding: 40px;
+            margin: 40px 0;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+        
+        .architecture-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #4a90e2;
+            text-align: center;
+        }
+        
+        .architecture-content {
+            font-family: 'Fira Code', monospace;
+            color: #b8c5d6;
             white-space: pre-line;
+            background: #0a0a0a;
+            padding: 24px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid rgba(74, 144, 226, 0.1);
         }
         
         .footer {
             text-align: center;
-            padding: 40px 0;
-            border-top: 1px solid #00ff41;
-            margin-top: 60px;
-            color: #666;
+            padding: 60px 0;
+            border-top: 1px solid rgba(74, 144, 226, 0.1);
+            margin-top: 80px;
+            color: #8892b0;
+        }
+        
+        .footer-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .status-bar {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <h1>INDUSTRIAL AUTOMATION</h1>
-            <div class="subtitle">Advanced File Management System</div>
-            <div class="subtitle">HMI-PLC-SCADA Architecture Applied to Repository Operations</div>
-            
-            <div class="status-bar">
-                <div class="status-item">
-                    <div class="status-light"></div>
-                    <span>Virtual Gateway Online</span>
+    <div class="hero-section">
+        <div class="container">
+            <div class="hero-content">
+                <div class="logo">INFLEXION POINT</div>
+                <h1 class="hero-title">Industrial Automation File Management</h1>
+                <p class="hero-subtitle">Revolutionary repository operations through proven HMI-PLC-SCADA architecture. Authentic file system integration with distributed control and real-time monitoring.</p>
+                
+                <div class="status-bar">
+                    <div class="status-item">
+                        <div class="status-light"></div>
+                        <span>Virtual Gateway Online</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-light"></div>
+                        <span>10 PLCs Deployed</span>
+                    </div>
+                    <div class="status-item">
+                        <div class="status-light"></div>
+                        <span>MQTT/WebSocket Active</span>
+                    </div>
                 </div>
-                <div class="status-item">
-                    <div class="status-light"></div>
-                    <span>10 PLCs Deployed</span>
+
+                <div class="cta-section">
+                    <a href="./.hmi/" class="btn">View Industrial HMI</a>
+                    <a href="./.plc/plc-config.json" class="btn btn-outline">PLC Configuration</a>
+                    <button onclick="openFullApp()" class="btn btn-outline">Launch Full Application</button>
                 </div>
-                <div class="status-item">
-                    <div class="status-light"></div>
-                    <span>MQTT/WebSocket Active</span>
-                </div>
-            </div>
-        </header>
-
-        <div class="grid">
-            <div class="card">
-                <h3>🏭 System Overview</h3>
-                <p>Revolutionary file management system that applies proven industrial automation architecture to solve repository operation challenges.</p>
-                <ul>
-                    <li>Virtual Ignition Gateway (Express Server)</li>
-                    <li>UNS (Unified Namespace) Tag Structure</li>
-                    <li>Distributed PLC Network</li>
-                    <li>HMI Perspective Interfaces</li>
-                    <li>SCADA Monitoring & Control</li>
-                </ul>
-            </div>
-
-            <div class="card">
-                <h3>🤖 PLC Controllers</h3>
-                <p>Each repository area has its own dedicated Programmable Logic Controller managing file operations and system metrics.</p>
-                <ul>
-                    <li>Client Area PLC - Frontend monitoring</li>
-                    <li>Server Area PLC - Backend operations</li>
-                    <li>Shared Resources PLC - Common assets</li>
-                    <li>Components PLC - UI component tracking</li>
-                    <li>Services PLC - Microservice management</li>
-                </ul>
-            </div>
-
-            <div class="card">
-                <h3>📟 HMI Interfaces</h3>
-                <p>Human-Machine Interfaces provide real-time visualization and control of file system operations using Perspective JSON views.</p>
-                <ul>
-                    <li>Real-time file count monitoring</li>
-                    <li>Directory size tracking</li>
-                    <li>Processing load indicators</li>
-                    <li>Status visualization</li>
-                    <li>Interactive control panels</li>
-                </ul>
-            </div>
-
-            <div class="card">
-                <h3>🔗 MQTT Communication</h3>
-                <p>Authentic industrial protocol enables machine-to-machine communication between PLCs and the central SCADA system.</p>
-                <ul>
-                    <li>PLC telemetry publishing</li>
-                    <li>Alarm notification system</li>
-                    <li>Command distribution</li>
-                    <li>Status synchronization</li>
-                    <li>Graceful WebSocket fallback</li>
-                </ul>
-            </div>
-
-            <div class="card">
-                <h3>📊 Local File Path API</h3>
-                <p>Authentic file system operations at the lowest level provide real data instead of mock implementations.</p>
-                <ul>
-                    <li>Directory scanning with metadata</li>
-                    <li>File content reading/writing</li>
-                    <li>Permission and checksum analysis</li>
-                    <li>Search functionality</li>
-                    <li>Copy/delete operations</li>
-                </ul>
-            </div>
-
-            <div class="card">
-                <h3>🎛️ SCADA Control Center</h3>
-                <p>Supervisory Control and Data Acquisition system for monitoring all PLC operations and managing alarms.</p>
-                <ul>
-                    <li>Centralized alarm management</li>
-                    <li>System metrics dashboard</li>
-                    <li>Emergency stop capabilities</li>
-                    <li>Historical data logging</li>
-                    <li>Performance optimization</li>
-                </ul>
             </div>
         </div>
+    </div>
 
-        <div class="terminal">
-            <div class="terminal-header">SYSTEM ARCHITECTURE:</div>
-            <div class="terminal-content">Enterprise/Site1/
+    <div class="section section-dark">
+        <div class="container">
+            <h2 class="section-title">System Architecture</h2>
+
+            <div class="grid">
+                <div class="card">
+                    <div class="card-icon">🏭</div>
+                    <h3>Virtual Gateway</h3>
+                    <p>Express server acting as industrial automation gateway with UNS tag management and distributed PLC coordination.</p>
+                    <ul>
+                        <li>Enterprise/Site1/Area hierarchy</li>
+                        <li>Real-time data processing</li>
+                        <li>Authentic file system integration</li>
+                        <li>Industrial communication protocols</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🤖</div>
+                    <h3>Distributed PLCs</h3>
+                    <p>Ten dedicated controllers managing repository areas with industrial-grade monitoring and control capabilities.</p>
+                    <ul>
+                        <li>Area-specific file operations</li>
+                        <li>Real-time telemetry publishing</li>
+                        <li>Processing load management</li>
+                        <li>Automated alarm generation</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">📟</div>
+                    <h3>HMI Interfaces</h3>
+                    <p>Perspective JSON-based human-machine interfaces for real-time visualization and interactive control.</p>
+                    <ul>
+                        <li>Live system metrics display</li>
+                        <li>Interactive control panels</li>
+                        <li>Status visualization</li>
+                        <li>Emergency control functions</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🔗</div>
+                    <h3>MQTT Communication</h3>
+                    <p>Industrial-standard machine-to-machine protocols with graceful WebSocket fallback for reliable data exchange.</p>
+                    <ul>
+                        <li>PLC telemetry streams</li>
+                        <li>Command distribution</li>
+                        <li>Alarm notifications</li>
+                        <li>Status synchronization</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">📊</div>
+                    <h3>File Path API</h3>
+                    <p>Authentic file system operations at the lowest level, providing real data instead of synthetic implementations.</p>
+                    <ul>
+                        <li>Directory structure scanning</li>
+                        <li>File metadata analysis</li>
+                        <li>Permission management</li>
+                        <li>Search and indexing</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-icon">🎛️</div>
+                    <h3>SCADA Control</h3>
+                    <p>Supervisory control and data acquisition system providing centralized monitoring and alarm management.</p>
+                    <ul>
+                        <li>System-wide oversight</li>
+                        <li>Performance optimization</li>
+                        <li>Historical data logging</li>
+                        <li>Emergency response</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="container">
+            <div class="architecture-section">
+                <div class="architecture-title">Enterprise Network Topology</div>
+                <div class="architecture-content">Enterprise/Site1/
 ├── ClientArea/PLC1     → Frontend monitoring & control
 ├── ServerArea/PLC2     → Backend services management  
 ├── SharedArea/PLC3     → Common resource coordination
@@ -288,52 +428,82 @@
 
 Communication Flow:
 PLCs → MQTT/WebSocket → Virtual Gateway → UNS Tags → HMI Interfaces → SCADA Monitor</div>
+            </div>
         </div>
+    </div>
 
-        <div class="links">
-            <a href="./.hmi/" class="btn">View Root HMI Interface</a>
-            <a href="./.plc/plc-config.json" class="btn">PLC Configuration</a>
-            <a href="#" onclick="openFullApp()" class="btn">Launch Full Application</a>
+    <div class="section section-dark">
+        <div class="container">
+            <h2 class="section-title">Why Industrial Automation?</h2>
+            <div class="architecture-section">
+                <p style="text-align: center; color: #8892b0; font-size: 1.1rem; margin-bottom: 30px;">
+                    Traditional file management lacks the robust monitoring, control, and automation capabilities found in industrial systems.
+                </p>
+                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="color: #4a90e2; font-size: 1.5rem; margin-bottom: 10px;">⚡</div>
+                        <h4 style="color: #ffffff; margin-bottom: 8px;">Real-time Monitoring</h4>
+                        <p style="color: #8892b0; font-size: 0.9rem;">Live file system change detection</p>
+                    </div>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="color: #4a90e2; font-size: 1.5rem; margin-bottom: 10px;">🚨</div>
+                        <h4 style="color: #ffffff; margin-bottom: 8px;">Automated Alarms</h4>
+                        <p style="color: #8892b0; font-size: 0.9rem;">Critical event notifications</p>
+                    </div>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="color: #4a90e2; font-size: 1.5rem; margin-bottom: 10px;">🔄</div>
+                        <h4 style="color: #ffffff; margin-bottom: 8px;">Distributed Control</h4>
+                        <p style="color: #8892b0; font-size: 0.9rem;">Area-specific automation</p>
+                    </div>
+                    <div style="text-align: center; padding: 20px;">
+                        <div style="color: #4a90e2; font-size: 1.5rem; margin-bottom: 10px;">📡</div>
+                        <h4 style="color: #ffffff; margin-bottom: 8px;">Industrial Protocols</h4>
+                        <p style="color: #8892b0; font-size: 0.9rem;">MQTT & Modbus communication</p>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
 
-        <div class="terminal">
-            <div class="terminal-header">WHY INDUSTRIAL AUTOMATION FOR FILES?</div>
-            <div class="terminal-content">Traditional file management lacks the robust monitoring, control, and automation capabilities found in industrial systems. This project demonstrates how proven SCADA/HMI/PLC architecture can revolutionize repository operations:
-
-✓ Real-time monitoring of file system changes
-✓ Automated alarm generation for critical events  
-✓ Distributed control across repository areas
-✓ Centralized SCADA supervision
-✓ Industrial-grade communication protocols
-✓ Authentic data integration at lowest level
-✓ Scalable architecture for complex systems
-
-The result is a file management system with the reliability, monitoring, and control capabilities of industrial automation platforms.</div>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-title">INFLEXION POINT</div>
+            <p>Industrial Automation File Management System</p>
+            <p>Authentic file system operations with distributed PLC controllers and SCADA supervision</p>
         </div>
-
-        <footer class="footer">
-            <p>Industrial Automation File Management System | Advanced HMI-PLC-SCADA Architecture</p>
-            <p>Authentic file system operations with distributed PLC controllers and MQTT communication</p>
-        </footer>
+    </footer>
     </div>
 
     <script>
-        // Add some industrial automation styling effects
+        // Add modern animation effects
         document.addEventListener('DOMContentLoaded', function() {
-            // Simulate real-time status updates
+            // Animate status lights with blue glow
             setInterval(function() {
                 const lights = document.querySelectorAll('.status-light');
                 lights.forEach(light => {
-                    light.style.boxShadow = `0 0 ${Math.random() * 20 + 5}px #00ff41`;
+                    const intensity = Math.random() * 15 + 5;
+                    light.style.boxShadow = `0 0 ${intensity}px #4a90e2`;
                 });
             }, 2000);
 
-            // Add terminal-like typing effect
-            const terminal = document.querySelector('.terminal-content');
-            if (terminal) {
-                terminal.style.borderRight = '2px solid #00ff41';
+            // Add subtle floating animation to cards
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-12px) scale(1.02)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Add typing cursor effect to architecture content
+            const archContent = document.querySelector('.architecture-content');
+            if (archContent) {
+                archContent.style.borderRight = '2px solid #4a90e2';
                 setInterval(function() {
-                    terminal.style.borderRight = terminal.style.borderRight === 'none' ? '2px solid #00ff41' : 'none';
+                    archContent.style.borderRight = archContent.style.borderRight === 'none' ? '2px solid #4a90e2' : 'none';
                 }, 1000);
             }
         });
@@ -343,7 +513,7 @@ The result is a file management system with the reliability, monitoring, and con
             const isGitHubPages = window.location.hostname.includes('github.io');
             
             if (isGitHubPages) {
-                alert('Full application requires local server with Node.js backend.\n\nTo run locally:\n1. Clone the repository\n2. npm install\n3. npm run dev\n\nThe HMI interface above demonstrates the industrial UI.');
+                alert('Full application requires local server with Node.js backend.\n\nTo run locally:\n1. Clone the repository\n2. npm install\n3. npm run dev\n\nThe HMI interface demonstrates the industrial UI.');
             } else {
                 // If running locally, try to open the full app
                 window.open('/', '_blank');
