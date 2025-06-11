@@ -385,7 +385,7 @@
         updateMetrics();
 
         // Load PLC configuration
-        fetch('../.plc/plc-config.json')
+        fetch('../plc/plc-config.json')
             .then(response => response.json())
             .then(config => {
                 console.log('PLC Configuration loaded:', config);
