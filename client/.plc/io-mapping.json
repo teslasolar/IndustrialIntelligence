@@ -1,0 +1,62 @@
+{
+  "inputs": {
+    "I:0/0": {
+      "tag": "File_Count_Input",
+      "description": "Directory file count"
+    },
+    "I:0/1": {
+      "tag": "Directory_Size_Input",
+      "description": "Directory total size"
+    },
+    "I:0/2": {
+      "tag": "Last_Modified_Input",
+      "description": "Last modification time"
+    },
+    "I:0/3": {
+      "tag": "System_Heartbeat",
+      "description": "System heartbeat signal"
+    }
+  },
+  "outputs": {
+    "O:0/0": {
+      "tag": "Status_Output",
+      "description": "PLC operational status"
+    },
+    "O:0/1": {
+      "tag": "Processing_Load_Output",
+      "description": "Processing load percentage"
+    },
+    "O:0/2": {
+      "tag": "High_Load_Alarm",
+      "description": "High processing load alarm"
+    },
+    "O:0/3": {
+      "tag": "High_File_Count_Alarm",
+      "description": "High file count alarm"
+    }
+  },
+  "registers": {
+    "N7:0": {
+      "tag": "File_Count_Register",
+      "description": "File count storage"
+    },
+    "N7:1": {
+      "tag": "Size_Register",
+      "description": "Directory size storage"
+    },
+    "N7:2": {
+      "tag": "Modified_Register",
+      "description": "Last modified timestamp"
+    },
+    "F8:0": {
+      "tag": "Load_Calculator",
+      "description": "Processing load calculation"
+    }
+  },
+  "timers": {
+    "T4:1": {
+      "preset": 300000,
+      "description": "Activity timeout timer (5min)"
+    }
+  }
+}

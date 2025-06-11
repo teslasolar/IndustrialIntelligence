@@ -1,5 +1,6 @@
 import { UnsNode, UnsTag, TagAlarm, PerspectiveView, InsertUnsNode, InsertUnsTag, InsertTagAlarm } from '@shared/schema';
 import { RepositoryScanner, DirectoryStats } from './repositoryScanner';
+import { PLCDeploymentService } from './plcDeploymentService';
 
 export class UnsTagService {
   private nodes: Map<string, UnsNode> = new Map();
@@ -7,11 +8,18 @@ export class UnsTagService {
   private alarms: Map<string, TagAlarm> = new Map();
   private views: Map<string, PerspectiveView> = new Map();
   private repositoryScanner: RepositoryScanner = new RepositoryScanner();
+  private plcDeployment: PLCDeploymentService = new PLCDeploymentService();
   private currentId = 1;
 
   constructor() {
     this.initializeUnsStructure();
+    this.deployPhysicalPLCs();
     this.startRepositoryMonitoring();
+  }
+
+  private async deployPhysicalPLCs() {
+    // Deploy actual PLC directories and control files to each repository location
+    await this.plcDeployment.deployAllPLCs();
   }
 
   private initializeUnsStructure() {
@@ -688,7 +696,17 @@ export class UnsTagService {
         const statusTag = this.tags.get(`${plcNodeId}/System/Status`);
         if (statusTag) {
           const isRecent = (Date.now() - stats.lastModified.getTime()) < 300000; // 5 minutes
-          this.updateTagValue(statusTag.tagPath, isRecent ? "Active" : "Running");
+          const status = isRecent ? "Active" : "Running";
+          this.updateTagValue(statusTag.tagPath, status);
+          
+          // Update physical PLC configuration file
+          this.plcDeployment.updatePLCStatus(area.path, {
+            fileCount: stats.fileCount,
+            directorySize: (stats.totalSize / (1024 * 1024)).toFixed(1),
+            lastModified: stats.lastModified.toISOString(),
+            processingLoad: Math.min(95, Math.max(5, (stats.fileCount * 0.5) + (stats.totalSize / (1024 * 1024)) * 0.1)).toFixed(1),
+            status: status
+          });
         }
       }
     });

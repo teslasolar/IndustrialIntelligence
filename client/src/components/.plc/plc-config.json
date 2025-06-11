@@ -1,0 +1,20 @@
+{
+  "plcId": "PLC4",
+  "areaName": "Components",
+  "controlPath": "client/src/components",
+  "scanRate": 100,
+  "model": "CompactLogix 5370",
+  "firmware": "v32.011",
+  "deployedAt": "2025-06-11T14:42:18.909Z",
+  "status": "Running",
+  "tags": {
+    "system": {
+      "fileCount": 52,
+      "directorySize": "0.2",
+      "lastModified": "2025-06-11T14:29:11.970Z",
+      "processingLoad": "26.0",
+      "status": "Running"
+    }
+  },
+  "lastUpdate": "2025-06-11T14:42:28.845Z"
+}

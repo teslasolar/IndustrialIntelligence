@@ -1,0 +1,20 @@
+{
+  "plcId": "PLC7",
+  "areaName": "Hooks",
+  "controlPath": "client/src/hooks",
+  "scanRate": 100,
+  "model": "CompactLogix 5370",
+  "firmware": "v32.011",
+  "deployedAt": "2025-06-11T14:42:18.914Z",
+  "status": "Running",
+  "tags": {
+    "system": {
+      "fileCount": 4,
+      "directorySize": "0.0",
+      "lastModified": "2025-06-11T14:37:12.726Z",
+      "processingLoad": "5.0",
+      "status": "Running"
+    }
+  },
+  "lastUpdate": "2025-06-11T14:42:28.845Z"
+}

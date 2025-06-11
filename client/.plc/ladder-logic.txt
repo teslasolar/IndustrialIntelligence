@@ -1,0 +1,27 @@
+// Ladder Logic for PLC1 - Client Controller
+// Generated: 2025-06-11T14:42:18.900Z
+
+// Input Rungs
+|--[File_Count_Input]--[MOV]--[File_Count_Register]--|
+|--[Directory_Size_Input]--[MOV]--[Size_Register]--|
+|--[Last_Modified_Input]--[MOV]--[Modified_Register]--|
+
+// Processing Logic
+|--[File_Count_Register]--[MUL 0.5]--[ADD]--[Load_Calculator]--|
+|--[Size_Register]--[DIV 1048576]--[MUL 0.1]--[ADD]--[Load_Calculator]--|
+|--[Load_Calculator]--[LIM 5 95]--[MOV]--[Processing_Load_Output]--|
+
+// Status Logic
+|--[System_Heartbeat]--[TON T4:1 300000]--[MOV "Active"]--[Status_Output]--|
+|--[T4:1/DN]--[MOV "Running"]--[Status_Output]--|
+
+// Alarm Logic
+|--[Processing_Load_Output]--[GRT 90]--[SET]--[High_Load_Alarm]--|
+|--[File_Count_Register]--[GRT 1000]--[SET]--[High_File_Count_Alarm]--|
+
+// Output Rungs
+|--[Status_Output]--[MOV]--[UNS_Status_Tag]--|
+|--[Processing_Load_Output]--[MOV]--[UNS_Load_Tag]--|
+|--[File_Count_Register]--[MOV]--[UNS_FileCount_Tag]--|
+
+// End of Program

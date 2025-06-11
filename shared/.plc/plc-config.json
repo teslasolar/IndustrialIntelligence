@@ -1,0 +1,20 @@
+{
+  "plcId": "PLC3",
+  "areaName": "Shared",
+  "controlPath": "shared",
+  "scanRate": 100,
+  "model": "CompactLogix 5370",
+  "firmware": "v32.011",
+  "deployedAt": "2025-06-11T14:42:18.906Z",
+  "status": "Running",
+  "tags": {
+    "system": {
+      "fileCount": 1,
+      "directorySize": "0.0",
+      "lastModified": "2025-06-11T02:00:42.158Z",
+      "processingLoad": "5.0",
+      "status": "Running"
+    }
+  },
+  "lastUpdate": "2025-06-11T14:42:28.845Z"
+}

@@ -1,0 +1,20 @@
+{
+  "plcId": "PLC8",
+  "areaName": "Pages",
+  "controlPath": "client/src/pages",
+  "scanRate": 100,
+  "model": "CompactLogix 5370",
+  "firmware": "v32.011",
+  "deployedAt": "2025-06-11T14:42:19.005Z",
+  "status": "Running",
+  "tags": {
+    "system": {
+      "fileCount": 2,
+      "directorySize": "0.0",
+      "lastModified": "2025-06-11T02:06:56.880Z",
+      "processingLoad": "5.0",
+      "status": "Running"
+    }
+  },
+  "lastUpdate": "2025-06-11T14:42:28.845Z"
+}

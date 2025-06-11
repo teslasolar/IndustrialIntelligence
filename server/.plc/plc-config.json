@@ -1,0 +1,20 @@
+{
+  "plcId": "PLC2",
+  "areaName": "Server",
+  "controlPath": "server",
+  "scanRate": 100,
+  "model": "CompactLogix 5370",
+  "firmware": "v32.011",
+  "deployedAt": "2025-06-11T14:42:18.903Z",
+  "status": "Running",
+  "tags": {
+    "system": {
+      "fileCount": 9,
+      "directorySize": "0.1",
+      "lastModified": "2025-06-11T14:41:23.822Z",
+      "processingLoad": "5.0",
+      "status": "Active"
+    }
+  },
+  "lastUpdate": "2025-06-11T14:42:28.845Z"
+}

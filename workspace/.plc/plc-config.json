@@ -1,0 +1,20 @@
+{
+  "plcId": "PLC10",
+  "areaName": "Workspace",
+  "controlPath": "workspace",
+  "scanRate": 100,
+  "model": "CompactLogix 5370",
+  "firmware": "v32.011",
+  "deployedAt": "2025-06-11T14:42:19.313Z",
+  "status": "Running",
+  "tags": {
+    "system": {
+      "fileCount": 0,
+      "directorySize": "0.0",
+      "lastModified": "1970-01-01T00:00:00.000Z",
+      "processingLoad": "5.0",
+      "status": "Running"
+    }
+  },
+  "lastUpdate": "2025-06-11T14:42:28.845Z"
+}

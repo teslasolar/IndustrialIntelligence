@@ -1,0 +1,20 @@
+{
+  "plcId": "PLC9",
+  "areaName": "Assets",
+  "controlPath": "attached_assets",
+  "scanRate": 100,
+  "model": "CompactLogix 5370",
+  "firmware": "v32.011",
+  "deployedAt": "2025-06-11T14:42:19.016Z",
+  "status": "Running",
+  "tags": {
+    "system": {
+      "fileCount": 3,
+      "directorySize": "0.1",
+      "lastModified": "2025-06-11T14:30:09.243Z",
+      "processingLoad": "5.0",
+      "status": "Running"
+    }
+  },
+  "lastUpdate": "2025-06-11T14:42:28.845Z"
+}
