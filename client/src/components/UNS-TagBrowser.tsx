@@ -53,6 +53,19 @@ export function UnsTagBrowser({ onSelectNode, onSelectTag, onSelectView }: UnsTa
   const [selectedNode, setSelectedNode] = useState<UnsNode | null>(null);
   const [activeTab, setActiveTab] = useState<'nodes' | 'tags' | 'views'>('nodes');
 
+  const formatTimestamp = (timestamp: Date | string | null): string => {
+    if (!timestamp) return '--:--:--';
+    
+    try {
+      const dateObj = timestamp instanceof Date ? timestamp : new Date(timestamp);
+      if (isNaN(dateObj.getTime())) return '--:--:--';
+      
+      return dateObj.toLocaleTimeString();
+    } catch (error) {
+      return '--:--:--';
+    }
+  };
+
   useEffect(() => {
     fetchUnsData();
   }, []);
@@ -249,7 +262,7 @@ export function UnsTagBrowser({ onSelectNode, onSelectTag, onSelectView }: UnsTa
                 {tag.value || 'NULL'}
               </span>
               <span className="text-xs text-gray-400">
-                {new Date(tag.timestamp).toLocaleTimeString()}
+                {formatTimestamp(tag.timestamp)}
               </span>
             </div>
           </div>
