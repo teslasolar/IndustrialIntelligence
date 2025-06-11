@@ -291,9 +291,9 @@ PLCs → MQTT/WebSocket → Virtual Gateway → UNS Tags → HMI Interfaces → 
         </div>
 
         <div class="links">
-            <a href=".hmi/index.html" class="btn">View Root HMI Interface</a>
-            <a href=".plc/plc-config.json" class="btn">PLC Configuration</a>
-            <a href="https://github.com/your-repo" class="btn">View Source Code</a>
+            <a href="./.hmi/" class="btn">View Root HMI Interface</a>
+            <a href="./.plc/plc-config.json" class="btn">PLC Configuration</a>
+            <a href="#" onclick="openFullApp()" class="btn">Launch Full Application</a>
         </div>
 
         <div class="terminal">
@@ -337,6 +337,18 @@ The result is a file management system with the reliability, monitoring, and con
                 }, 1000);
             }
         });
+
+        function openFullApp() {
+            // Detect if running on GitHub Pages or locally
+            const isGitHubPages = window.location.hostname.includes('github.io');
+            
+            if (isGitHubPages) {
+                alert('Full application requires local server with Node.js backend.\n\nTo run locally:\n1. Clone the repository\n2. npm install\n3. npm run dev\n\nThe HMI interface above demonstrates the industrial UI.');
+            } else {
+                // If running locally, try to open the full app
+                window.open('/', '_blank');
+            }
+        }
     </script>
 </body>
 </html>
