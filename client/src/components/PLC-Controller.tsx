@@ -32,7 +32,9 @@ export function PLCController({
 }: PLCControllerProps) {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
 
-  const getFileIcon = (type: string) => {
+  const getFileIcon = (type: string | undefined) => {
+    if (!type) return <FileCode className="text-industrial-blue" />;
+    
     switch (type.toLowerCase()) {
       case 'javascript':
       case 'typescript':
