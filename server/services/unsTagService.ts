@@ -1,14 +1,17 @@
 import { UnsNode, UnsTag, TagAlarm, PerspectiveView, InsertUnsNode, InsertUnsTag, InsertTagAlarm } from '@shared/schema';
+import { RepositoryScanner, DirectoryStats } from './repositoryScanner';
 
 export class UnsTagService {
   private nodes: Map<string, UnsNode> = new Map();
   private tags: Map<string, UnsTag> = new Map();
   private alarms: Map<string, TagAlarm> = new Map();
   private views: Map<string, PerspectiveView> = new Map();
+  private repositoryScanner: RepositoryScanner = new RepositoryScanner();
   private currentId = 1;
 
   constructor() {
     this.initializeUnsStructure();
+    this.startRepositoryMonitoring();
   }
 
   private initializeUnsStructure() {
@@ -622,5 +625,72 @@ export class UnsTagService {
         this.updateTagValue(throughputTag.tagPath, Math.floor(newValue).toString());
       }
     }, 2000);
+  }
+
+  private async startRepositoryMonitoring() {
+    // Update PLCs with real repository data every 5 seconds
+    setInterval(async () => {
+      try {
+        const repoStats = await this.repositoryScanner.scanAllRepositoryAreas();
+        this.updatePLCsWithRealData(repoStats);
+      } catch (error) {
+        console.error('Error updating PLC data with repository stats:', error);
+      }
+    }, 5000);
+  }
+
+  private updatePLCsWithRealData(repoStats: DirectoryStats[]) {
+    const repoAreas = [
+      { name: "Client", path: "client" },
+      { name: "Server", path: "server" },
+      { name: "Shared", path: "shared" },
+      { name: "Components", path: "client/src/components" },
+      { name: "Services", path: "server/services" },
+      { name: "Types", path: "client/src/types" },
+      { name: "Hooks", path: "client/src/hooks" },
+      { name: "Pages", path: "client/src/pages" },
+      { name: "Assets", path: "attached_assets" },
+      { name: "Workspace", path: "workspace" }
+    ];
+
+    repoAreas.forEach((area, index) => {
+      const plcNodeId = `Enterprise/Site1/${area.name}Area/PLC${index + 1}`;
+      const stats = repoStats.find(s => s.path === area.path);
+      
+      if (stats) {
+        // Update file count
+        const fileCountTag = this.tags.get(`${plcNodeId}/System/FileCount`);
+        if (fileCountTag) {
+          this.updateTagValue(fileCountTag.tagPath, stats.fileCount.toString());
+        }
+
+        // Update directory size (convert bytes to MB)
+        const sizeTag = this.tags.get(`${plcNodeId}/System/DirectorySize`);
+        if (sizeTag) {
+          const sizeInMB = (stats.totalSize / (1024 * 1024)).toFixed(1);
+          this.updateTagValue(sizeTag.tagPath, sizeInMB);
+        }
+
+        // Update last modified time
+        const modifiedTag = this.tags.get(`${plcNodeId}/System/LastModified`);
+        if (modifiedTag) {
+          this.updateTagValue(modifiedTag.tagPath, stats.lastModified.toISOString());
+        }
+
+        // Calculate processing load based on file count and size
+        const loadTag = this.tags.get(`${plcNodeId}/System/ProcessingLoad`);
+        if (loadTag) {
+          const load = Math.min(95, Math.max(5, (stats.fileCount * 0.5) + (stats.totalSize / (1024 * 1024)) * 0.1));
+          this.updateTagValue(loadTag.tagPath, load.toFixed(1));
+        }
+
+        // Update status based on recent activity
+        const statusTag = this.tags.get(`${plcNodeId}/System/Status`);
+        if (statusTag) {
+          const isRecent = (Date.now() - stats.lastModified.getTime()) < 300000; // 5 minutes
+          this.updateTagValue(statusTag.tagPath, isRecent ? "Active" : "Running");
+        }
+      }
+    });
   }
 }
